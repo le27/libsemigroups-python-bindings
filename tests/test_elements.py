@@ -44,35 +44,35 @@ class TestBipartition(unittest.TestCase):
                          Bipartition([1, -1], [2, 3, -2], [-3]))
 
         with self.assertRaises(TypeError):
-            PartialPerm([1, 2], [2, 1], 3) == \
-            Bipartition([1, -1], [2, 3, -2], [-3])
+            (PartialPerm([1, 2], [2, 1], 3) ==
+            Bipartition([1, -1], [2, 3, -2], [-3]))
         with self.assertRaises(TypeError):
             Bipartition([1, -1], [2, -2]) < Transformation([0, 1])
         with self.assertRaises(TypeError):
             Bipartition([1, -1], [2, -2]) != Transformation([0, 1])
 
     def test_mul(self):
-        self.assertEqual(Bipartition([1, -1, 2, -2]) * \
+        (self.assertEqual(Bipartition([1, -1, 2, -2]) *
                          Bipartition([1, -1, 2, -2]),
-                         Bipartition([1, 2, -1, -2]))
-        self.assertEqual(Bipartition([1, 2], [-1], [-2]) * \
+                         Bipartition([1, 2, -1, -2])))
+        (self.assertEqual(Bipartition([1, 2], [-1], [-2]) *
                          Bipartition([1, -1], [2, -2]),
-                         Bipartition([1, 2], [-1], [-2]))
-        self.assertEqual(Bipartition([1, -1], [2, 3, -2], [-3]) * \
+                         Bipartition([1, 2], [-1], [-2])))
+        (self.assertEqual(Bipartition([1, -1], [2, 3, -2], [-3]) *
                          Bipartition([1, 3, 2, -3], [-2], [-1]),
-                         Bipartition([1, 2, 3, -3], [-1], [-2]))
+                         Bipartition([1, 2, 3, -3], [-1], [-2])))
 
         with self.assertRaises(TypeError):
-            Bipartition([1, -1], [2, 3, -3], [-2]) * \
-            PartialPerm([0, 1], [1, 2], 3)
+            (Bipartition([1, -1], [2, 3, -3], [-2]) *
+            PartialPerm([0, 1], [1, 2], 3))
         with self.assertRaises(TypeError):
             Transformation([0, 2, 1]) * Bipartition([1, -1], [2, 3, -3], [-2])
         with self.assertRaises(TypeError):
             Bipartition([1, -1], [2, 3, -3], [-2]) * 26
 
         with self.assertRaises(ValueError):
-            Bipartition([1, -1], [2, 3, -3], [-2]) * \
-            Bipartition([1, -1, 2, -2])
+            (Bipartition([1, -1], [2, 3, -3], [-2]) *
+            Bipartition([1, -1, 2, -2]))
 
     def test_pow(self):
         self.assertEqual(Bipartition([-7, -6, -5, -4], [3, 2, 1],
@@ -251,13 +251,13 @@ class TestBooleanMat(unittest.TestCase):
         self.assertGreaterEqual(BooleanMat([False]), BooleanMat([False]))
 
         with self.assertRaises(TypeError):
-            Bipartition([1, -2], [-1, 2]) >= \
-            BooleanMat([False, False], [True, False])
+            (Bipartition([1, -2], [-1, 2]) >=
+            BooleanMat([False, False], [True, False]))
         with self.assertRaises(TypeError):
             BooleanMat([False, False], [True, False]) < Transformation([0, 1])
         with self.assertRaises(TypeError):
-            BooleanMat([True, False], [False, True]) == \
-            PartialPerm([0], [1], 2)
+            (BooleanMat([True, False], [False, True]) ==
+            PartialPerm([0], [1], 2))
 
     def test_getitem(self):
         self.assertEqual(BooleanMat([1, 0], [0, 0])[0], [1, 0])
@@ -267,20 +267,20 @@ class TestBooleanMat(unittest.TestCase):
             BooleanMat([1, 0, 1], [1, 0, 0], [0, 1, 1])[3]
 
     def test_mul(self):
-        self.assertEqual(BooleanMat([True, False], [False, True]) * \
-                         BooleanMat([False, False], [False, True]),
-                         BooleanMat([False, False], [False, True]))
+        (self.assertEqual(BooleanMat([True, False], [False, True]) *
+                          BooleanMat([False, False], [False, True]),
+                          BooleanMat([False, False], [False, True])))
         self.assertEqual(BooleanMat([False]) * BooleanMat([True]),
                          BooleanMat([False]))
-        self.assertEqual(BooleanMat([False, True, True],
-                                    [True, True, False],
-                                    [False, False, False]) * \
-                         BooleanMat([False, True, False],
-                                    [True, False, False],
-                                    [False, False, True]),
-                         BooleanMat([True, False, True],
-                                    [True, True, False],
-                                    [False, False, False]))
+        (self.assertEqual(BooleanMat([False, True, True],
+                                     [True, True, False],
+                                     [False, False, False]) *
+                          BooleanMat([False, True, False],
+                                     [True, False, False],
+                                     [False, False, True]),
+                          BooleanMat([True, False, True],
+                                     [True, True, False],
+                                     [False, False, False])))
 
         with self.assertRaises(TypeError):
             BooleanMat([True, True], [False, False]) * Transformation([1, 1])
@@ -294,10 +294,10 @@ class TestBooleanMat(unittest.TestCase):
             BooleanMat([True, False], [False, True]) * Bipartition([1, 2], [-1], [-2])
 
         with self.assertRaises(ValueError):
-            BooleanMat([False, True, True],
+            (BooleanMat([False, True, True],
                        [True, True, False],
-                       [False, False, False]) * \
-            BooleanMat([True, False], [False, True])
+                       [False, False, False]) * 
+            BooleanMat([True, False], [False, True]))
 
     def test_pow(self):
         self.assertEqual(BooleanMat([True, False], [False, True]) ** 30,
@@ -430,25 +430,25 @@ class TestPartialPerm(unittest.TestCase):
                              PartialPerm([1, 2, 3], [2, 1, 0], 5))
 
         with self.assertRaises(TypeError):
-            PartialPerm([1, 2], [2, 1], 3) == \
-            Bipartition([1, -1], [2, 3, -2], [-3])
+            (PartialPerm([1, 2], [2, 1], 3) ==
+            Bipartition([1, -1], [2, 3, -2], [-3]))
         with self.assertRaises(TypeError):
             PartialPerm([0, 1], [0, 1], 2) < Transformation([0, 1])
         with self.assertRaises(TypeError):
             PartialPerm([0, 1], [0, 1], 2) != Transformation([0, 1])
 
     def test_mul(self):
-        self.assertEqual(PartialPerm([0, 1], [0, 1], 2) * \
+        (self.assertEqual(PartialPerm([0, 1], [0, 1], 2) *
                          PartialPerm([0, 1], [0, 1], 2),
-                         PartialPerm([0, 1], [0, 1], 2))
-        self.assertEqual(PartialPerm([1, 2, 4, 6, 7, 23],
-                                     [0, 5, 2, 4, 6, 7], 26) * \
+                         PartialPerm([0, 1], [0, 1], 2)))
+        (self.assertEqual(PartialPerm([1, 2, 4, 6, 7, 23],
+                                     [0, 5, 2, 4, 6, 7], 26) *
                          PartialPerm([2, 4, 3, 5, 0, 19],
                                      [7, 8, 2, 3, 23, 0], 26),
-                         PartialPerm([1, 2, 4, 6], [23, 3, 7, 8], 26))
-        self.assertEqual(PartialPerm([0, 3, 7, 2], [5, 7, 1, 3], 8) * \
+                         PartialPerm([1, 2, 4, 6], [23, 3, 7, 8], 26)))
+        (self.assertEqual(PartialPerm([0, 3, 7, 2], [5, 7, 1, 3], 8) *
                          PartialPerm([4, 7, 3, 6], [5, 0, 3, 2], 8),
-                         PartialPerm([2, 3], [3, 0], 8))
+                         PartialPerm([2, 3], [3, 0], 8)))
 
         with self.assertRaises(TypeError):
             PartialPerm([0, 1], [0, 1], 2) * Transformation([0, 1])
@@ -598,8 +598,8 @@ class TestPBR(unittest.TestCase):
         with self.assertRaises(TypeError):
             PBR([[1, -1], [-2, -1]], [[1], [-2, -1]]) < Transformation([0, 1])
         with self.assertRaises(TypeError):
-            PBR([[1, -1], [-2, -1]], [[1], [-2, -1]]) != \
-            PartialPerm([0, 1], [1, 0], 2)
+            (PBR([[1, -1], [-2, -1]], [[1], [-2, -1]]) !=
+            PartialPerm([0, 1], [1, 0], 2))
         with self.assertRaises(TypeError):
             PBR([[1, -1]], [[1]]) < 3
 
@@ -620,12 +620,12 @@ class TestPBR(unittest.TestCase):
                              [[-2, -1, 2], [-3, -2, -1, 1, 2], [-1, 2]]))
 
         with self.assertRaises(TypeError):
-            Transformation([0, 2, 1]) * \
-            PBR([[1, -1, 3], [-2, -1, 2], [3, -2]], [[2], [-2], [1, -1, 2]])
+            (Transformation([0, 2, 1]) *
+            PBR([[1, -1, 3], [-2, -1, 2], [3, -2]], [[2], [-2], [1, -1, 2]]))
         with self.assertRaises(TypeError):
-            PBR([[1, -1, 3], [-2, -1, 2], [3, -2]],
-                [[2], [-2], [1, -1, 2]]) * \
-            Bipartition([1, -1], [2, 3, -3], [-2])
+            (PBR([[1, -1, 3], [-2, -1, 2], [3, -2]],
+                [[2], [-2], [1, -1, 2]]) *
+            Bipartition([1, -1], [2, 3, -3], [-2]))
         with self.assertRaises(TypeError):
             PBR([[1, -1]], [[1]]) * 0.142857
 
@@ -739,14 +739,14 @@ class TestTransformation(unittest.TestCase):
             Bipartition([1, -1], [2, -2]) != Transformation([0, 1])
 
     def test_mul(self):
-        self.assertEqual(Transformation([1, 3, 2, 1]) * \
+        (self.assertEqual(Transformation([1, 3, 2, 1]) *
                          Transformation([0, 3, 2, 2]),
-                         Transformation([3, 2, 2, 3]))
+                         Transformation([3, 2, 2, 3])))
         self.assertEqual(Transformation([2, 2, 2]) * Transformation([1, 0, 1]),
                          Transformation([1, 1, 1]))
-        self.assertEqual(Transformation([0, 1, 2, 3, 4, 5]) * \
+        (self.assertEqual(Transformation([0, 1, 2, 3, 4, 5]) *
                          Transformation([3, 2, 2, 3, 1, 4]),
-                         Transformation([3, 2, 2, 3, 1, 4]))
+                         Transformation([3, 2, 2, 3, 1, 4])))
 
         with self.assertRaises(TypeError):
             Transformation([0, 2, 1]) * PartialPerm([0, 1], [1, 2], 3)
