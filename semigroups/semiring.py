@@ -10,7 +10,11 @@ class Semiring:
     A semiring is a set :math:`R`, together with two binary operations,
     :math:`+, \times`, such that :math:`(R, +)` is a commutative monoid,
     with identity called 0, :math:`(R\backslash\{0\},\times)` is a 
-    monoid, with identity 1, and :math:`(R, +, \times)` is distributive.
+    monoid, with identity 1, :math:`(R, +, \times)` is left and right
+    distributive (ie :math:`\forall a, b, c \in R \quad a(b + c) = ab + ac` and
+    :math:`\forall a, b, c \in R \quad (a + b)c = ac + bc`), and multiplication
+    by zero must annihilate :math:`R`, that is :math:`\forall a \in R \quad
+    a \cdot 0 = 0 \cdot a = 0`.
 
     Args:
         None
