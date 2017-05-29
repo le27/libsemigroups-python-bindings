@@ -8,7 +8,7 @@ clean:
 tests:
 	python2.7 -m nose --with-doctest
 	python3.6 -m nose --with-doctest
-	
+
 coverage: pip-install
 	coverage run -m unittest discover
 	coverage html
