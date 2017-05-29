@@ -20,26 +20,28 @@ class TestBipartition(unittest.TestCase):
             Bipartition([1, -1, 2])
         with self.assertRaises(ValueError):
             Bipartition([1, 2, 3], [-3, -2])
-
+        with self.assertRaises(TypeError):
+            Bipartition([0, 1, 2], [-1, -2])
         with self.assertRaises(TypeError):
             Bipartition([1, 2, 3], (-1, -2, -3))
         with self.assertRaises(TypeError):
             Bipartition(1, 2, -1, -2)
 
     def test_richcmp(self):
-        # FIXME should be self.assertEqual and self.assertNotEqual
-        assert Bipartition([3, -4, -1], [2, -3], [4, -2], [1]) == \
-               Bipartition([4, -2], [3, -4, -1], [1], [2, -3])
-        assert not Bipartition([3, -4, -1], [2, -3], [4, -2], [1]) != \
-                   Bipartition([4, -2], [3, -4, -1], [1], [2, -3])
-        assert Bipartition([1, -1, 3], [-3, 2, -2]) <= \
-               Bipartition([1, -1], [2, 3, -2], [-3])
-        assert Bipartition([1, -1], [2, -2]) < Bipartition([1, -2], [2, -1])
-        assert Bipartition([1, -1], [2, -2]) <= Bipartition([1, -2], [2, -1])
-        assert Bipartition([1, -1, 3], [-3, 2, -2]) >= \
-               Bipartition([1, -2], [2, -1])
-        assert not Bipartition([1, -1, 3], [-3, 2, -2]) > \
-                   Bipartition([1, -1], [2, 3, -2], [-3])
+        self.assertEqual(Bipartition([3, -4, -1], [2, -3], [4, -2], [1]),
+                         Bipartition([4, -2], [3, -4, -1], [1], [2, -3]))
+        self.assertFalse(Bipartition([3, -4, -1], [2, -3], [4, -2], [1]) !=
+                         Bipartition([4, -2], [3, -4, -1], [1], [2, -3]))
+        self.assertLessEqual(Bipartition([1, -1, 3], [-3, 2, -2]),
+                             Bipartition([1, -1], [2, 3, -2], [-3]))
+        self.assertLess(Bipartition([1, -1], [2, -2]),
+                        Bipartition([1, -2], [2, -1]))
+        self.assertLessEqual(Bipartition([1, -1], [2, -2]),
+                             Bipartition([1, -2], [2, -1]))
+        self.assertGreaterEqual(Bipartition([1, -1, 3], [-3, 2, -2]),
+                                Bipartition([1, -2], [2, -1]))
+        self.assertFalse(Bipartition([1, -1, 3], [-3, 2, -2]) > 
+                         Bipartition([1, -1], [2, 3, -2], [-3]))
 
         with self.assertRaises(TypeError):
             PartialPerm([1, 2], [2, 1], 3) == \
@@ -204,6 +206,7 @@ class TestBooleanMat(unittest.TestCase):
                    [False, False, False])
         BooleanMat([True])
         BooleanMat([True, False], [False, True])
+        BooleanMat([1, 0], [0, 0])
 
     def test_init_fail(self):
         with self.assertRaises(TypeError):
@@ -223,28 +226,29 @@ class TestBooleanMat(unittest.TestCase):
             BooleanMat([True, False], [False, False], [True, True])
         with self.assertRaises(ValueError):
             BooleanMat([True, True, False], [False, False])
+        with self.assertRaises(ValueError):
+            BooleanMat()
 
     def test_richcmp(self):
-        # FIXME should be self.assertEqual and self.assertNotEqual
-        assert BooleanMat([True, False], [False, True]) == \
-               BooleanMat([True, False], [False, True])
-        assert not BooleanMat([True, False], [False, True]) != \
-                   BooleanMat([True, False], [False, True])
-        assert not BooleanMat([True, False], [False, True]) == \
-                   BooleanMat([False, False], [False, True])
-        assert BooleanMat([False]) < BooleanMat([True])
-        assert not BooleanMat([False, True, True],
-                              [True, True, False],
-                              [False, False, False]) < \
-                   BooleanMat([False, True, False],
-                              [True, False, False],
-                              [False, False, True])
-        assert BooleanMat([False]) <= BooleanMat([False])
-        assert BooleanMat([True, False], [False, True]) > \
-               BooleanMat([True, False], [False, False])
-        assert not BooleanMat([True, False], [False, True]) > \
-                   BooleanMat([True, False], [False, True])
-        assert BooleanMat([False]) >= BooleanMat([False])
+        self.assertEqual(BooleanMat([True, False], [False, True]),
+                         BooleanMat([True, False], [False, True]))
+        self.assertFalse(BooleanMat([True, False], [False, True]) !=
+                         BooleanMat([True, False], [False, True]))
+        self.assertFalse(BooleanMat([True, False], [False, True]) ==
+                         BooleanMat([False, False], [False, True]))
+        self.assertLess(BooleanMat([False]), BooleanMat([True]))
+        self.assertFalse(BooleanMat([False, True, True],
+                                    [True, True, False],
+                                    [False, False, False]) <
+                         BooleanMat([False, True, False],
+                                    [True, False, False],
+                                    [False, False, True]))
+        self.assertLessEqual(BooleanMat([False]), BooleanMat([False]))
+        self.assertGreater(BooleanMat([True, False], [False, True]),
+                           BooleanMat([True, False], [False, False]))
+        self.assertFalse(BooleanMat([True, False], [False, True]) >
+                         BooleanMat([True, False], [False, True]))
+        self.assertGreaterEqual(BooleanMat([False]), BooleanMat([False]))
 
         with self.assertRaises(TypeError):
             Bipartition([1, -2], [-1, 2]) >= \
@@ -254,6 +258,13 @@ class TestBooleanMat(unittest.TestCase):
         with self.assertRaises(TypeError):
             BooleanMat([True, False], [False, True]) == \
             PartialPerm([0], [1], 2)
+
+    def test_getitem(self):
+        self.assertEqual(BooleanMat([1, 0], [0, 0])[0], [1, 0])
+        self.assertEqual(BooleanMat([1, 0], [0, 0])[1], [0, 0])
+
+        with self.assertRaises(IndexError):
+            BooleanMat([1, 0, 1], [1, 0, 0], [0, 1, 1])[3]
 
     def test_mul(self):
         self.assertEqual(BooleanMat([True, False], [False, True]) * \
@@ -344,6 +355,7 @@ class TestBooleanMat(unittest.TestCase):
                           [True, True, False],
                           [False, False, False]])
         self.assertEqual(BooleanMat([False]).rows(), [[False]])
+        self.assertEqual(BooleanMat([0, 0], [0, 0]).identity().rows(), [[1, 0], [0, 1]])
 
     def test_repr(self):
         self.assertEqual(eval(BooleanMat([True, True], [False, False]).__repr__()),
@@ -396,27 +408,26 @@ class TestPartialPerm(unittest.TestCase):
             PartialPerm([0, 1], [2, 3], 4.3)
 
     def test_richcmp(self):
-        # FIXME should be self.assertEqual and self.assertNotEqual
-        assert PartialPerm([1, 2, 3], [2, 1, 0], 5) == \
-               PartialPerm([1, 2, 3], [2, 1, 0], 5)
-        assert not PartialPerm([1, 2, 3], [2, 1, 0], 5) != \
-                   PartialPerm([1, 2, 3], [2, 1, 0], 5)
-        assert not PartialPerm([1, 2, 4], [2, 1, 0], 5) == \
-                   PartialPerm([1, 2, 3], [2, 3, 0], 5)
-        assert PartialPerm([1, 2, 4], [2, 1, 0], 5) != \
-               PartialPerm([1, 2, 3], [2, 3, 0], 5)
-        assert not PartialPerm([1, 2, 4], [2, 1, 0], 5) < \
-                   PartialPerm([1, 2, 3], [2, 3, 0], 5)
-        assert PartialPerm([1, 2], [0, 1], 3) < \
-               PartialPerm([2, 0], [0, 1], 3)
-        assert not PartialPerm([1, 2], [0, 1], 3) > \
-                   PartialPerm([2, 0], [0, 1], 3)
-        assert PartialPerm([1, 2], [1, 2], 3) > \
-               PartialPerm([1, 2], [0, 1], 3)
-        assert PartialPerm([1, 2], [1, 2], 3) >= \
-               PartialPerm([1, 2], [0, 1], 3)
-        assert PartialPerm([1, 2, 3], [2, 1, 0], 5) <= \
-               PartialPerm([1, 2, 3], [2, 1, 0], 5)
+        self.assertEqual(PartialPerm([1, 2, 3], [2, 1, 0], 5),
+                         PartialPerm([1, 2, 3], [2, 1, 0], 5))
+        self.assertFalse(PartialPerm([1, 2, 3], [2, 1, 0], 5) != 
+                         PartialPerm([1, 2, 3], [2, 1, 0], 5))
+        self.assertFalse(PartialPerm([1, 2, 4], [2, 1, 0], 5) == 
+                          PartialPerm([1, 2, 3], [2, 3, 0], 5))
+        self.assertNotEqual(PartialPerm([1, 2, 4], [2, 1, 0], 5),
+                            PartialPerm([1, 2, 3], [2, 3, 0], 5))
+        self.assertFalse(PartialPerm([1, 2, 4], [2, 1, 0], 5) < 
+                          PartialPerm([1, 2, 3], [2, 3, 0], 5))
+        self.assertLess(PartialPerm([1, 2], [0, 1], 3),
+                        PartialPerm([2, 0], [0, 1], 3))
+        self.assertFalse(PartialPerm([1, 2], [0, 1], 3) > 
+                         PartialPerm([2, 0], [0, 1], 3))
+        self.assertGreater(PartialPerm([1, 2], [1, 2], 3),
+                           PartialPerm([1, 2], [0, 1], 3))
+        self.assertGreaterEqual(PartialPerm([1, 2], [1, 2], 3),
+                                PartialPerm([1, 2], [0, 1], 3))
+        self.assertLessEqual(PartialPerm([1, 2, 3], [2, 1, 0], 5),
+                             PartialPerm([1, 2, 3], [2, 1, 0], 5))
 
         with self.assertRaises(TypeError):
             PartialPerm([1, 2], [2, 1], 3) == \
@@ -528,6 +539,12 @@ class TestPartialPerm(unittest.TestCase):
         self.assertEqual(eval(PartialPerm([1, 2, 3], [2, 1, 0], 5).__repr__()),
                          PartialPerm([1, 2, 3], [2, 1, 0], 5))
 
+    def test_init_dom_ran(self):
+        X = PartialPerm([0, 1, 3], [0, 2, 4], 5) ** 2
+        X._init_dom_ran()
+        self.assertTrue(X._range is not None)
+        self.assertTrue(X._domain is not None)
+
 class TestPBR(unittest.TestCase):
     def test_init(self):
         PBR([[1, -1]], [[1]])
@@ -535,6 +552,8 @@ class TestPBR(unittest.TestCase):
         PBR([[1, -1], [-2, -1, 2]], [[2], [-2]])
         PBR([[1, -1, 3], [-2, -1, 2], [3, -2]], [[2], [-2], [1, -1, 2]])
         PBR([[1, 2], [-2, 1, 2], [3, -3]], [[2, 1], [-2, 2, 1], [1, -1]])
+        PBR([[1, 2], [-2, 1, 2], [3, -3]], [[2, 1], [-2, 2, 1], [1, -1]])
+        PBR([[[1, 2], [-2, 1, 2], [3, -3]], [[2, 1], [-2, 2, 1], [1, -1]]])
 
     def test_init_fail(self):
         with self.assertRaises(ValueError):
@@ -669,12 +688,18 @@ class TestPBR(unittest.TestCase):
                          PBR([[-1, 1, 2], [2]], [[-1, 1], [-2, 2]]))
 
         self.assertEqual(eval(PBR([[1, 2, 3, -1, -2, -3],
-                              [1, 2, 3, -1, -2, -3], [3, -2, -3]],
-                              [[2], [3, -2, -3], [1, 2, 3, -2, -3]]).__repr__()),
+                                   [1, 2, 3, -1, -2, -3], [3, -2, -3]],
+                                  [[2], [3, -2, -3], 
+                                   [1, 2, 3, -2, -3]]).__repr__()),
                          PBR([[1, 2, 3, -1, -2, -3],
                               [1, 2, 3, -1, -2, -3], [3, -2, -3]],
                               [[2], [3, -2, -3], [1, 2, 3, -2, -3]]))
-        self.assertEqual(eval(PBR([[1, -1]], [[1]]).__repr__()), PBR([[1, -1]], [[1]]))
+        self.assertEqual(eval(PBR([[1, -1]], [[1]]).__repr__()), 
+                              PBR([[1, -1]], [[1]]))
+        self.assertEqual(eval(PBR([[1, 2], [1, -1]], 
+                                  [[1], [2]]).identity().__repr__()),
+                         PBR([[-1], [-2]], [[1], [2]]))
+
 
 class TestTransformation(unittest.TestCase):
     def test_init(self):
@@ -696,16 +721,15 @@ class TestTransformation(unittest.TestCase):
             Transformation([0.1, 1.0])
 
     def test_richcmp(self):
-        # FIXME should be self.assertEqual and self.assertNotEqual
-        assert Transformation([1, 2, 2, 0]) == Transformation([1, 2, 2, 0])
-        assert not Transformation([1, 2, 2, 0]) == Transformation([1, 2, 1, 3])
-        assert Transformation([1, 2, 2, 0]) != Transformation([1, 2, 1, 3])
-        assert not Transformation([2, 2, 1]) < Transformation([0, 1, 2])
-        assert Transformation([2, 2, 1]) > Transformation([0, 1, 2])
-        assert Transformation([2, 2, 1]) <= Transformation([2, 2, 2])
-        assert Transformation([2, 2, 2]) <= Transformation([2, 2, 2])
-        assert Transformation([2, 2, 2]) >= Transformation([2, 2, 0])
-        assert Transformation([3, 2, 3, 0]) >= Transformation([3, 2, 0, 1])
+        self.assertEqual(Transformation([1, 2, 2, 0]), Transformation([1, 2, 2, 0]))
+        self.assertFalse(Transformation([1, 2, 2, 0]) == Transformation([1, 2, 1, 3]))
+        self.assertNotEqual(Transformation([1, 2, 2, 0]), Transformation([1, 2, 1, 3]))
+        self.assertFalse(Transformation([2, 2, 1]) < Transformation([0, 1, 2]))
+        self.assertGreater(Transformation([2, 2, 1]), Transformation([0, 1, 2]))
+        self.assertLessEqual(Transformation([2, 2, 1]), Transformation([2, 2, 2]))
+        self.assertLessEqual(Transformation([2, 2, 2]), Transformation([2, 2, 2]))
+        self.assertGreaterEqual(Transformation([2, 2, 2]), Transformation([2, 2, 0]))
+        self.assertGreaterEqual(Transformation([3, 2, 3, 0]), Transformation([3, 2, 0, 1]))
 
         with self.assertRaises(TypeError):
             Transformation([2, 2, 0]) == Bipartition([1, -1], [2, 3, -2], [-3])
