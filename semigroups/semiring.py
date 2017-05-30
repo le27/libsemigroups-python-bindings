@@ -582,10 +582,10 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
                 and (isinstance(y, int) or y == float('inf'))):
             raise TypeError
 
-        if (x < 0 and x != float('inf')) or (y < 0 and y != float('inf')):
+        if x < 0 or y < 0:
             raise ValueError
 
-        if (x > self._threshold) or (y > self._threshold):
+        if (x > self._threshold and x != float('inf')) or (y > self._threshold and y != float('inf')):
             raise ValueError
 
         return min(x, y)
@@ -614,11 +614,14 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
                 and (isinstance(y, int) or y == float('inf'))):
             raise TypeError
 
-        if (x < 0 and x != float('inf')) or (y < 0 and y != float('inf')):
+        if x < 0 or y < 0:
             raise ValueError
 
-        if (x > self._threshold) or (y > self._threshold):
+        if (x > self._threshold and x != float('inf')) or (y > self._threshold and y != float('inf')):
             raise ValueError
+
+        if max(x, y) == float('inf'):
+            return x
 
         return min(self._threshold, x + y)
 
