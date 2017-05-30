@@ -3,6 +3,7 @@ This module contains classes for representing elements of semigroups.
 '''
 # pylint: disable = no-member, protected-access, invalid-name,
 # pylint: disable = too-few-public-methods
+# pylint: disable = len-as-condition
 
 import libsemigroups
 
@@ -56,7 +57,7 @@ class PartialPerm(libsemigroups.PartialPermNC):
 
     Args:
         args (list):    Image list of the partial permutation when applied to
-                        :math:`[0, 1, ..., n], \ -1` being used to indicate the 
+                        :math:`[0, 1, ..., n], \ -1` being used to indicate the
                         image is undefined.
 
         args (list):    List containing the domain, as a list of ints, then the
@@ -178,6 +179,8 @@ class PartialPerm(libsemigroups.PartialPermNC):
 
 
 class Bipartition(libsemigroups.BipartitionNC):
+
+    # pylint: disable = too-many-branches, non-parent-init-called
     r'''A bipartition is a partition of the set :math:`\{-n, \ldots, -1, 1,
     \ldots, n\}` for some :math:`n\in\mathbb{N}`. This can be stored as a list of blocks,
     the subsets of the bipartition.
@@ -313,6 +316,7 @@ class Bipartition(libsemigroups.BipartitionNC):
 
 
 class BooleanMat(libsemigroups.BooleanMatNC):
+    # pylint: disable = non-parent-init-called
     '''
     A boolean matrix is a square matrix with entries either True or False.
     These can be entered as True, False or 1, 0.
@@ -398,9 +402,11 @@ class BooleanMat(libsemigroups.BooleanMatNC):
 
 
 class PBR(libsemigroups.PBRNC):
-    """
+
+    # pylint: disable = non-parent-init-called
+    r"""
     Let :math:`n\in\mathbb{N}, \ X = \{-n, \ldots, -1\}\cup \{1, \ldots, n\}`.
-    A partitioned binary relation (PBR) is a set of :math:`2n` pairs, each 
+    A partitioned binary relation (PBR) is a set of :math:`2n` pairs, each
     comprising a distinct element :math:`x\in X` and a subset :math:`Y
     \subseteq X`.
 
