@@ -68,7 +68,7 @@ class Integers(Semiring):
 
     def prod(self, x, y):
         """
-        A function to find the sum of two integers, since this is the 
+        A function to find the sum of two integers, since this is the
         multiplication operation of the integers.
 
         Args:
@@ -80,10 +80,11 @@ class Integers(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints.
-            
         """
+
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
+
         return x * y
 
     def zero(self):
@@ -115,14 +116,14 @@ class Integers(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
-            
         """
+
         return 1
 
 
 class MaxPlusSemiring(Semiring):
-    """
-    The max plus semiring is a semiring comprising the set 
+    r"""
+    The max plus semiring is a semiring comprising the set
     :math:`\mathbb{Z}\cup\{-\infty\}`, together with an operation which
     returns the maximum of two elements, as the additive operation and addition
     as the multiplicative operation.
@@ -139,8 +140,8 @@ class MaxPlusSemiring(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
-        
     """
+
     def __init___(self):
         pass
 
@@ -159,12 +160,12 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or minus infinity.
-            
         """
+
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
-    
+
         return max(x, y)
 
     def prod(self, x, y):
@@ -182,11 +183,12 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or minus infinity.
-            
         """
+
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
+
         return x + y
 
     def zero(self):
@@ -203,6 +205,7 @@ class MaxPlusSemiring(Semiring):
         Raises:
             TypeError:  If any argument is given.
         """
+
         return self._minus_infinity
 
     def one(self):
@@ -218,14 +221,13 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
-            
         """
+
         return 0
 
-
 class MinPlusSemiring(Semiring):
-    """
-    The min plus semiring is a semiring comprising the set 
+    r"""
+    The min plus semiring is a semiring comprising the set
     :math:`\mathbb{Z}\cup\{\infty\}`, together with an operation which
     returns the maximum of two elements, as the additive operation and addition
     as the multiplicative operation.
@@ -242,8 +244,8 @@ class MinPlusSemiring(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
-        
     """
+
     def __init___(self):
         pass
 
@@ -262,11 +264,12 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or plus infinity.
-            
         """
+
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
             raise TypeError
+
         return min(x, y)
 
     def prod(self, x, y):
@@ -284,11 +287,12 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or plus infinity.
-            
         """
+
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
             raise TypeError
+
         return x + y
 
     def zero(self):
@@ -305,6 +309,7 @@ class MinPlusSemiring(Semiring):
         Raises:
             TypeError:  If any argument is given.
         """
+
         return self._plus_infinity
 
     def one(self):
@@ -320,8 +325,8 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
-            
         """
+
         return 0
 
 class BooleanSemiring(Semiring):
@@ -337,8 +342,8 @@ class BooleanSemiring(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
-        
     """
+
     def __init__(self):
         pass
 
@@ -356,10 +361,11 @@ class BooleanSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both bools.
-            
         """
+
         if not (isinstance(x, type(True)) and isinstance(y, type(True))):
             raise TypeError
+
         return x | y
 
     def prod(self, x, y):
@@ -376,15 +382,16 @@ class BooleanSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both bools.
-            
         """
+
         if not (isinstance(x, type(True)) and isinstance(y, type(True))):
             raise TypeError
+
         return x & y
 
     def zero(self):
         """
-        A function to find the additive identity of the boolean  self._threshold = threshold semiring, which
+        A function to find the additive identity of the boolean semiring, which
         is False.
 
         Args:
@@ -397,7 +404,7 @@ class BooleanSemiring(Semiring):
             TypeError:  If any argument is given.
         """
         return False
-    
+
     def one(self):
         """
         A function to find the mutliplicative identity of the boolean semiring,
@@ -412,6 +419,7 @@ class BooleanSemiring(Semiring):
         Raises:
             TypeError:  If any argument is given.
         """
+
         return True
 
 class SemiringWithThreshold(Semiring):
@@ -427,6 +435,7 @@ class SemiringWithThreshold(Semiring):
     Raises:
         TypeError:  If any argument is given.
     """
+
     def __init__(self):
         pass
 
@@ -440,6 +449,7 @@ class SemiringWithThreshold(Semiring):
         Raises:
             TypeError:  If any argument is given.
         """
+
         return self._threshold
 
 class TropicalMaxPlusSemiring(SemiringWithThreshold):
@@ -448,15 +458,15 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
     \ldots, t\} \cup\{-\infty\}`, for some value :math:`t\in\mathbb{N}_0`, the
     threshold of the semiring, together with an operation which returns the
     maximum of two elements, as the additive operation and addition of integers
-    as the multiplicative operation. 
+    as the multiplicative operation.
 
     Minus infinity is a defined as smaller than all integers, and the integer
     sum of minus infinity and any element of the max plus semiring is minus
     infinity.
 
-    If the integer sum of any two elements is greater than the threshold, then 
+    If the integer sum of any two elements is greater than the threshold, then
     the product is the threshold.
-    
+
     Args:
         threshold (int):    The threshold of the semiring.
 
@@ -466,13 +476,15 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
     Raises:
         TypeError:  If threshold is not an int.
         ValueError: If threshold is negative.
-        
     """
+
     def __init___(self, threshold):
         if not isinstance(threshold, int):
             raise TypeError
+
         if threshold < 0:
             raise ValueError
+
         self._threshold = threshold
 
     def plus(self, x, y):
@@ -492,19 +504,18 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints or minus infinity.
             ValueError: If either x or y is negative and not minus infinity, or
                         if x or y is greater than the threshold.
-            
         """
 
-        if not ((isinstance(x, int) or x == -float('inf'))
-                and (isinstance(y, int) or y == -float('inf'))):
+        if not ((isinstance(x, int) or x == self._minus_infinity)
+                and (isinstance(y, int) or y == self._minus_infinity)):
             raise TypeError
 
-        if (x < 0 and x != -float(inf)) or (y < 0 and y != -float(inf)):
+        if (x < 0 and x != self._minus_infinity) or (y < 0 and y != self._minus_infinity):
             raise ValueError
 
         if (x > self._threshold) or (y > self._threshold):
             raise ValueError
-    
+
         return max(x, y)
 
     def prod(self, x, y):
@@ -527,11 +538,11 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
                         if x or y is greater than the threshold.
         """
 
-        if not ((isinstance(x, int) or x == -float('inf'))
-                and (isinstance(y, int) or y == -float('inf'))):
+        if not ((isinstance(x, int) or x == self._minus_infinity)
+                and (isinstance(y, int) or y == self._minus_infinity)):
             raise TypeError
 
-        if (x < 0 and x != -float(inf)) or (y < 0 and y != -float(inf)):
+        if (x < 0 and x != self._minus_infinity) or (y < 0 and y != self._minus_infinity):
             raise ValueError
 
         if (x > self._threshold) or (y > self._threshold):
@@ -553,6 +564,7 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         Raises:
             TypeError:  If any argument is given.
         """
+
         return self._minus_infinity
 
     def one(self):
@@ -568,7 +580,6 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
-            
         """
-        return 0
 
+        return 0
