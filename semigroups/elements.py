@@ -189,16 +189,17 @@ class PartialPerm(libsemigroups.PartialPermNC):
 
 
 class Bipartition(libsemigroups.BipartitionNC):
-    r'''A bipartition is a partition of the set :math:`\{-n, \ldots, -1, 1, \ldots, n\}`
-    for some integer n. This can be stored as a list of blocks, the subsets
-    of the bipartition.
+    r'''A bipartition is a partition of the set :math:`\{-n, \ldots, -1, 1,
+    \ldots, n\}` for some integer n. This can be stored as a list of blocks,
+    the subsets of the bipartition.
 
     Args:
         args (lists):   The blocks of the bipartition as lists.
 
     Raises:
-        TypeError:  If any of the blocks are not lists
-        ValueError: If the union of the blocks is not the set :math:`\{-n, ..., -1\} \cup \{1, \ldots, n\}`
+        TypeError:  If any of the blocks are not lists.
+        ValueError: If the union of the blocks is not the set :math:`\{-n, ...,
+                    -1\} \cup \{1, \ldots, n\}`
 
     Example:
         >>> from semigroups import Bipartition
@@ -233,25 +234,25 @@ class Bipartition(libsemigroups.BipartitionNC):
                              + '[-%s .. -1, 1 .. %s],' % (n, n))
 
         copy = [x[:] for x in args]
-        for i in range(len(copy)):
-            for j in range(len(copy[i])):
-                if copy[i][j] < 0:
-                    copy[i][j] = abs(copy[i][j]) + n
+        for i, iitem in enumerate(copy):
+            for j, jitem in enumerate(iitem):
+                if jitem < 0:
+                    copy[i][j] = abs(jitem) + n
 
         copy = [sorted(x) for x in copy]
         copy.sort()
 
         lookup = [0] * 2 * n
         next_block = 0
-        for i in range(len(copy)):
-            for j in copy[i]:
+        for item in copy:
+            for j in item:
                 lookup[j - 1] = next_block
             next_block += 1
 
-        for i in range(len(copy)):
-            for j in range(len(copy[i])):
-                if copy[i][j] > n:
-                    copy[i][j] = -1 * copy[i][j] + n
+        for i, iitem in enumerate(copy):
+            for j, jitem in enumerate(iitem):
+                if jitem > n:
+                    copy[i][j] = -1 * jitem + n
 
         self._blocks = copy
         libsemigroups.BipartitionNC.__init__(self, lookup)
@@ -327,7 +328,7 @@ class Bipartition(libsemigroups.BipartitionNC):
 
 class BooleanMat(libsemigroups.BooleanMatNC):
     '''
-    A boolean matrix is a square matrix with entries either True or False. 
+    A boolean matrix is a square matrix with entries either True or False.
     These can be entered as True, False or 1, 0.
 
     Args:
