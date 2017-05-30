@@ -16,9 +16,6 @@ class Semiring:
     by zero must annihilate :math:`R`, that is :math:`\forall a \in R \quad
     a \cdot 0 = 0 \cdot a = 0`.
 
-    Args:
-        None
-
     Returns:
         None
 
@@ -33,9 +30,6 @@ class Semiring:
 class Integers(Semiring):
     """
     The usual ring of the Integers.
-
-    Args:
-        None
 
     Returns:
         None
@@ -89,9 +83,6 @@ class Integers(Semiring):
         A function to find the additive identity of the integers, which
         is 0.
 
-        Args:
-            None
-
         Returns:
             int:    0
 
@@ -104,9 +95,6 @@ class Integers(Semiring):
         """
         A function to find the multiplicative identity of the integers, which
         is 1.
-
-        Args:
-            None
 
         Returns:
             int:    1
@@ -128,9 +116,6 @@ class MaxPlusSemiring(Semiring):
     Minus infinity is a defined as smaller than all integers, and the integer
     sum of minus infinity and any element of the max plus semiring is minus
     infinity.
-
-    Args:
-        None
 
     Returns:
         None
@@ -190,9 +175,6 @@ class MaxPlusSemiring(Semiring):
         A function to find the additive identity of the max plus
         semiring, which is minus infinity.
 
-        Args:
-            None
-
         Returns:
             float:   -inf
 
@@ -206,9 +188,6 @@ class MaxPlusSemiring(Semiring):
         """
         A function to find the multiplicative identity of the max plus
         semiring, which is 0.
-
-        Args:
-            None
 
         Returns:
             int:    0
@@ -229,9 +208,6 @@ class MinPlusSemiring(Semiring):
     Plus infinity is a defined as greater than all integers, and the integer
     sum of plus infinity and any element of the max plus semiring is plus
     infinity.
-
-    Args:
-        None
 
     Returns:
         None
@@ -291,9 +267,6 @@ class MinPlusSemiring(Semiring):
         A function to find the additive identity of the min plus
         semiring, which is plus infinity.
 
-        Args:
-            None
-
         Returns:
             float:   inf
 
@@ -308,9 +281,6 @@ class MinPlusSemiring(Semiring):
         A function to find the multiplicative identity of the min plus
         semiring, which is 0.
 
-        Args:
-            None
-
         Returns:
             int:    0
 
@@ -324,9 +294,6 @@ class BooleanSemiring(Semiring):
     r"""
     The boolean semiring is a semiring comprising the set :math:`\{\text{True},
     \text{False} \}`, together with the operations 'or' and 'and'.
-
-    Args:
-        None
 
     Returns:
         None
@@ -382,9 +349,6 @@ class BooleanSemiring(Semiring):
         A function to find the additive identity of the boolean semiring, which
         is False.
 
-        Args:
-            None
-
         Returns:
             bool:   False
 
@@ -397,9 +361,6 @@ class BooleanSemiring(Semiring):
         """
         A function to find the mutliplicative identity of the boolean semiring,
         which is True.
-
-        Args:
-            None
 
         Returns:
             bool:   True
@@ -540,9 +501,6 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         A function to find the additive identity of the tropical max plus
         semiring, which is minus infinity.
 
-        Args:
-            None
-
         Returns:
             float:   -inf
 
@@ -556,9 +514,6 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         """
         A function to find the multiplicative identity of the tropical max plus
         semiring, which is 0.
-
-        Args:
-            None
 
         Returns:
             int:    0
