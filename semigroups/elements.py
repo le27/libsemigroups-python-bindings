@@ -189,19 +189,16 @@ class PartialPerm(libsemigroups.PartialPermNC):
 
 
 class Bipartition(libsemigroups.BipartitionNC):
-    r'''A class for bipartitions.
-
-    A bipartition is a partition of the set :math:`\{-n, ..., -1, 1, ..., n\}`
+    r'''A bipartition is a partition of the set :math:`\{-n, \ldots, -1, 1, \ldots, n\}`
     for some integer n. This can be stored as a list of blocks, the subsets
-    of the bipartition
+    of the bipartition.
 
     Args:
         args (lists):   The blocks of the bipartition as lists.
 
     Raises:
         TypeError:  If any of the blocks are not lists
-        ValueError: If the union of the blocks is not the set {-n, ..., -1}
-                    union {1, ..., n}
+        ValueError: If the union of the blocks is not the set :math:`\{-n, ..., -1\} \cup \{1, \ldots, n\}`
 
     Example:
         >>> from semigroups import Bipartition
@@ -330,9 +327,8 @@ class Bipartition(libsemigroups.BipartitionNC):
 
 class BooleanMat(libsemigroups.BooleanMatNC):
     '''
-    A class for handles to libsemigroups BooleanMat.
-
-    A boolean matrix is a matrix with entries either True or False.
+    A boolean matrix is a square matrix with entries either True or False. 
+    These can be entered as True, False or 1, 0.
 
     Args:
         args (lists):   The rows of the matrix as lists.
