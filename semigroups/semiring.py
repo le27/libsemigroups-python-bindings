@@ -135,7 +135,7 @@ class MaxPlusSemiring(Semiring):
             y (int or float):    The other of the elements to be added.
 
         Returns:
-            int float:    The maximum of x and y.
+            int or float:    The maximum of x and y.
 
         Raises:
             TypeError:  If x and y are not both ints or minus infinity.
@@ -670,7 +670,7 @@ class NaturalSemiring(SemiringWithThreshold):
         TypeError:  If the threshold and period are not both ints.
         ValueError: If the threshold is negative or the period is not positive.
     """
- 
+
     def __init__(self, threshold, period):
         if not (isinstance(period, int) and isinstance(threshold, int)):
             raise TypeError
@@ -702,8 +702,8 @@ class NaturalSemiring(SemiringWithThreshold):
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
 
-        if not (0 <= x < self._threshold + self._period) and (0 <= y < 
-                self._threshold + self._period):
+        if not ((0 <= x < self._threshold + self._period) and
+                (0 <= y < self._threshold + self._period)):
             raise ValueError
 
         return (x + y - self._threshold) % self._period + self._threshold
@@ -729,8 +729,8 @@ class NaturalSemiring(SemiringWithThreshold):
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
 
-        if not (0 <= x < self._threshold + self._period) and (0 <= y < 
-                self._threshold + self._period):
+        if not ((0 <= x < self._threshold + self._period) and
+                (0 <= y < self._threshold + self._period)):
             raise ValueError
 
         return (x * y - self._threshold) % self._period + self._threshold
@@ -773,4 +773,3 @@ class NaturalSemiring(SemiringWithThreshold):
         """
 
         return 1
-    
