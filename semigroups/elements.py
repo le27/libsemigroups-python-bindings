@@ -11,8 +11,8 @@ import libsemigroups
 class Transformation(libsemigroups.TransformationNC):
     r'''
     Let :math:`n\in\mathbb{N}, \ X = \{0, \ldots, n - 1\}`. A
-    transformation is a function :math:`f:X \to X`, where :math:`n` is called
-    the degree of the transformation.
+    *transformation* is a function :math:`f:X \to X`, where :math:`n` is called
+    the *degree* of the transformation.
 
     Args:
         List (list):    Image list of the Transformation when applied to
@@ -48,9 +48,8 @@ class Transformation(libsemigroups.TransformationNC):
 
 
 class PartialPerm(libsemigroups.PartialPermNC):
-
     r'''
-    A partial permutation :math:`f` is an injective partial transformation,
+    A *partial permutation* :math:`f` is an injective partial transformation,
     which is stored as a list of the images of :math:`\{0, 1, \ldots, n - 1\}`,
     i.e. :math:`[(0)f, (1)f, \ldots, (n - 1)f]`, where the value -1 is used to
     indicate :math:`i(f)` is undefined.
@@ -181,9 +180,9 @@ class PartialPerm(libsemigroups.PartialPermNC):
 class Bipartition(libsemigroups.BipartitionNC):
 
     # pylint: disable = too-many-branches, non-parent-init-called
-    r'''A bipartition is a partition of the set :math:`\{-n, \ldots, -1, 1,
-    \ldots, n\}` for some :math:`n\in\mathbb{N}`. This can be stored as a list of blocks,
-    the subsets of the bipartition.
+    r'''A *bipartition* is a partition of the set :math:`\{-n, \ldots, -1, 1,
+    \ldots, n\}` for some :math:`n\in\mathbb{N}`. This can be stored as a list
+    of *blocks*, the subsets of the bipartition.
 
     Args:
         args (lists):   The blocks of the bipartition as lists.
@@ -191,7 +190,7 @@ class Bipartition(libsemigroups.BipartitionNC):
     Raises:
         TypeError:  If any of the blocks are not lists.
         ValueError: If the union of the blocks is not the set :math:`\{-n, ...,
-                    -1\} \cup \{1, \ldots, n\}`
+                    -1\} \cup \{1, \ldots, n\}`.
 
     Example:
         >>> from semigroups import Bipartition
@@ -318,7 +317,7 @@ class Bipartition(libsemigroups.BipartitionNC):
 class BooleanMat(libsemigroups.BooleanMatNC):
     # pylint: disable = non-parent-init-called
     '''
-    A boolean matrix is a square matrix with entries either True or False.
+    A *boolean matrix* is a square matrix with entries either True or False.
     These can be entered as True, False or 1, 0.
 
     Args:
@@ -406,9 +405,10 @@ class PBR(libsemigroups.PBRNC):
     # pylint: disable = non-parent-init-called
     r"""
     Let :math:`n\in\mathbb{N}, \ X = \{-n, \ldots, -1\}\cup \{1, \ldots, n\}`.
-    A partitioned binary relation (PBR) is a set of :math:`2n` pairs, each
+    A *partitioned binary relation (PBR)* is a set of :math:`2n` pairs, each
     comprising a distinct element :math:`x\in X` and a subset :math:`Y
-    \subseteq X`.
+    \subseteq X`. The elements of the subset in a PBR corresponding to an
+    element :math:`x\in X` are called the *adjacencies* of :math:`x`.
 
     Args:
         args (lists):   The adjacencies of the negative elements as a list of
