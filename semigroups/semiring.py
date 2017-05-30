@@ -649,3 +649,128 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
         """
 
         return 0
+
+class NaturalSemiring(SemiringWithThreshold):
+    r"""
+    Let :math:`t\in\mathbb{N}_0, p\in\mathbb{N}` and :math:`\equiv` be the
+    congruence relation on :math:`\mathbb{N}_0` defined by :math:`t\equiv t +
+    p`. The natural semiring is a semiring comprising the set :math:`\{0,
+    \ldots, p + t - 1\}`, together with addition and multiplication of naturals
+    modulo :math:`\equiv`. Then :math:`t` is the threshold of the semiring and
+    :math:`p` is the period.
+
+    Args:
+        threshold (int):    The threshold of the semiring.
+        period (int):       The period of the semiring.
+
+    Returns:
+        None
+
+    Raises:
+        TypeError:  If the threshold and period are not both ints.
+        ValueError: If the threshold is negative or the period is not positive.
+    """
+ 
+    def __init__(self, threshold, period):
+        if not (isinstance(period, int) and isinstance(threshold, int)):
+            raise TypeError
+
+        if period < 1 or threshold < 0:
+            raise ValueError
+
+        self._period = period
+        self._threshold = threshold
+
+    def plus(self, x, y):
+        r"""
+        A function to find the integer sum modulo :math:`\equiv`, of two
+        elements of the natural semiring.
+
+        Args:
+            x (int):    One of the elements to be added.
+            y (int):    The other of the elements to be added.
+
+        Returns:
+            int:   The integer sum modulo :math:`\equiv`, of x and y.
+
+        Raises:
+            TypeError:  If x and y are not both ints.
+            ValueError: If either x or y is negative, or greater than :math:`t
+                        + p - 1`.
+        """
+
+        if not (isinstance(x, int) and isinstance(y, int)):
+            raise TypeError
+
+        if not (0 <= x < self._threshold + self._period) and (0 <= y < 
+                self._threshold + self._period):
+            raise ValueError
+
+        return (x + y - self._threshold) % self._period + self._threshold
+
+    def prod(self, x, y):
+        r"""
+        A function to find the integer p modulo :math:`\equiv`, of two
+        elements of the natural semiring.
+
+        Args:
+            x (int):    One of the elements to be added.
+            y (int):    The other of the elements to be added.
+
+        Returns:
+            int:   The integer product modulo :math:`\equiv`, of x and y.
+
+        Raises:
+            TypeError:  If x and y are not both ints.
+            ValueError: If either x or y is negative, or greater than :math:`t
+                        + p - 1`.
+        """
+
+        if not (isinstance(x, int) and isinstance(y, int)):
+            raise TypeError
+
+        if not (0 <= x < self._threshold + self._period) and (0 <= y < 
+                self._threshold + self._period):
+            raise ValueError
+
+        return (x * y - self._threshold) % self._period + self._threshold
+
+    def period(self):
+        """
+        A function to find the period of the Natural Semiring instance.
+
+        Returns:
+            int:    period.
+
+        Raises:
+            TypeError:  If any argument is given.
+        """
+        return self._period
+
+    def zero(self):
+        """
+        A function to find the additive identity of the Natural Semiring, which
+        is 0.
+
+        Returns:
+            int:    0
+
+        Raises:
+            TypeError:  If any argument is given.
+        """
+        return 0
+
+    def one(self):
+        """
+        A function to find the multiplicative identity of the Natural Semiring,
+        which is 1.
+
+        Returns:
+            int:    1
+
+        Raises:
+            TypeError:  If any argument is given.
+        """
+
+        return 1
+    
