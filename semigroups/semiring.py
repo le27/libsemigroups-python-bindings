@@ -523,3 +523,129 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         """
 
         return 0
+
+class TropicalMinPlusSemiring(SemiringWithThreshold):
+    r"""
+    The tropical min plus semiring is a semiring comprising the set :math:`\{0,
+    \ldots, t\} \cup\{-\infty\}`, for some value :math:`t\in\mathbb{N}_0`, the
+    threshold of the semiring, together with an operation which returns the
+    maximum of two elements, as the additive operation and addition of integers
+    as the multiplicative operation.
+
+    Plus infinity is a defined as greater than all integers, and the integer
+    sum of plus infinity and any element of the tropical min plus semiring is plus
+    infinity.
+
+    If the integer sum of any two elements is greater than the threshold, then
+    the product is the threshold.
+
+    Args:
+        threshold (int):    The threshold of the semiring.
+
+    Returns:
+        None
+
+    Raises:
+        TypeError:  If threshold is not an int.
+        ValueError: If threshold is negative.
+    """
+
+    def __init__(self, threshold):
+        if not isinstance(threshold, int):
+            raise TypeError
+
+        if threshold < 0:
+            raise ValueError
+
+        self._threshold = threshold
+
+    def plus(self, x, y):
+        """
+        A function to find the maximum of two elements of the tropical min plus
+        semiring, since this is the addition operation of the tropical min plus
+        semiring.
+
+        Args:
+            x (int or float):    One of the elements to be added.
+            y (int or float):    The other of the elements to be added.
+
+        Returns:
+            int or float:   The minimum of x and y.
+
+        Raises:
+            TypeError:  If x and y are not both ints or plus infinity.
+            ValueError: If either x or y is negative and not plus infinity, or
+                        if x or y is greater than the threshold.
+        """
+
+        if not ((isinstance(x, int) or x == float('inf'))
+                and (isinstance(y, int) or y == float('inf'))):
+            raise TypeError
+
+        if (x < 0 and x != float('inf')) or (y < 0 and y != float('inf')):
+            raise ValueError
+
+        if (x > self._threshold) or (y > self._threshold):
+            raise ValueError
+
+        return min(x, y)
+
+    def prod(self, x, y):
+        """
+        A function to find the integer sum of two elements of the tropical min
+        plus semiring, since this is the addition operation of the min plus
+        semiring. If the integer sum is greater than :math:`t`, then the result
+        is :math:`t`.
+
+        Args:
+            x (int or float):    One of the elements to be multiplied.
+            y (int or float):    The other of the elements to be multplied.
+
+        Returns:
+            int or float:    x + y
+
+        Raises:
+            TypeError:  If x and y are not both ints or plus infinity.
+            ValueError: If either x or y is negative and not plus infinity, or
+                        if x or y is greater than the threshold.
+        """
+
+        if not ((isinstance(x, int) or x == float('inf'))
+                and (isinstance(y, int) or y == float('inf'))):
+            raise TypeError
+
+        if (x < 0 and x != float('inf')) or (y < 0 and y != float('inf')):
+            raise ValueError
+
+        if (x > self._threshold) or (y > self._threshold):
+            raise ValueError
+
+        return min(self._threshold, x + y)
+
+    def zero(self):
+        """
+        A function to find the additive identity of the tropical min plus
+        semiring, which is plus infinity.
+
+        Returns:
+            float:   inf
+
+        Raises:
+            TypeError:  If any argument is given.
+        """
+
+        return float('inf')
+
+    def one(self):
+        """
+        A function to find the multiplicative identity of the tropical min plus
+        semiring, which is 0.
+
+        Returns:
+            int:    0
+
+        Raises:
+            TypeError:  If any argument is given.
+        """
+
+        return 0
