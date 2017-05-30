@@ -38,6 +38,13 @@ class Integers(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
+
+    Examples:
+        >>> from semigroups import Integers
+        >>> Integers().plus(3, 4)
+        7
+        >>> Integers().prod(3, 4)
+        12
     """
 
     @staticmethod
@@ -55,6 +62,11 @@ class Integers(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints.
+
+        Examples:
+            >>> from semigroups import Integers
+            >>> Integers().plus(2, -5)
+            -3
         """
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
@@ -75,8 +87,12 @@ class Integers(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints.
-        """
 
+        Examples:
+            >>> from semigroups import Integers
+            >>> Integers().prod(-13, 2)
+            -26
+        """
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
 
@@ -93,6 +109,11 @@ class Integers(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import Integers
+            >>> Integers().zero()
+            0
         """
         return 0
 
@@ -107,6 +128,11 @@ class Integers(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import Integers
+            >>> Integers().one()
+            1
         """
 
         return 1
@@ -128,6 +154,13 @@ class MaxPlusSemiring(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
+
+    Examples:
+        >>> from semigroups import MaxPlusSemiring
+        >>> MaxPlusSemiring().plus(-float('inf'), -20)
+        -20
+        >>> MaxPlusSemiring().prod(-float('inf'), -20)
+        -inf
     """
 
     @staticmethod
@@ -146,8 +179,12 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or minus infinity.
-        """
 
+        Examples:
+            >>> from semigroups import MaxPlusSemiring
+            >>> MaxPlusSemiring().plus(7, -20)
+            7
+        """
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
@@ -170,8 +207,12 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or minus infinity.
-        """
 
+        Examples:
+            >>> from semigroups import MaxPlusSemiring
+            >>> MaxPlusSemiring().prod(7, -20)
+            -140
+        """
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
@@ -189,8 +230,12 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
-        """
 
+        Examples:
+            >>> from semigroups import MaxPlusSemiring
+            >>> MaxPlusSemiring().zero()
+            -inf
+        """
         return -float('inf')
 
     @staticmethod
@@ -204,8 +249,12 @@ class MaxPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
-        """
 
+        Examples:
+            >>> from semigroups import MaxPlusSemiring
+            >>> MaxPlusSemiring().one()
+            0
+        """
         return 0
 
 class MinPlusSemiring(Semiring):
@@ -224,6 +273,13 @@ class MinPlusSemiring(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
+
+    Examples:
+        >>> from semigroups import MinPlusSemiring
+        >>> MinPlusSemiring().plus(3, float('inf'))
+        3
+        >>> MinPlusSemiring().prod(3, float('inf'))
+        inf
     """
 
     @staticmethod
@@ -242,8 +298,12 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or plus infinity.
-        """
 
+        Examples:
+            >>> from semigroups import MinPlusSemiring
+            >>> MinPlusSemiring().plus(37, 73)
+            37
+        """
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
             raise TypeError
@@ -266,6 +326,11 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both ints or plus infinity.
+
+        Examples:
+            >>> from semigroups import MinPlusSemiring
+            >>> MinPlusSemiring().plus(37, 73)
+            73
         """
 
         if not ((isinstance(x, int) or x == float('inf'))
@@ -285,6 +350,11 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import MinPlusSemiring
+            >>> MinPlusSemiring().zero()
+            inf
         """
 
         return float('inf')
@@ -300,6 +370,11 @@ class MinPlusSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import MinPlusSemiring
+            >>> MinPlusSemiring().one()
+            0
         """
 
         return 0
@@ -314,6 +389,13 @@ class BooleanSemiring(Semiring):
 
     Raises:
         TypeError:  If any argument is given.
+
+    Examples:
+        >>> from semigroups import BooleanSemiring
+        >>> BooleanSemiring().plus(True, False)
+        True
+        >>> BooleanSemiring().prod(True, False)
+        False
     """
 
     @staticmethod
@@ -331,6 +413,11 @@ class BooleanSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both bools.
+
+        Examples:
+            >>> from semigroups import BooleanSemiring
+            >>> BooleanSemiring().plus(True, True)
+            True
         """
 
         if not (isinstance(x, type(True)) and isinstance(y, type(True))):
@@ -353,6 +440,11 @@ class BooleanSemiring(Semiring):
 
         Raises:
             TypeError:  If x and y are not both bools.
+
+        Examples:
+            >>> from semigroups import BooleanSemiring
+            >>> BooleanSemiring().prod(True, True)
+            True
         """
 
         if not (isinstance(x, type(True)) and isinstance(y, type(True))):
@@ -371,6 +463,11 @@ class BooleanSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import BooleanSemiring
+            >>> BooleanSemiring().zero()
+            False
         """
         return False
 
@@ -385,6 +482,11 @@ class BooleanSemiring(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import BooleanSemiring
+            >>> BooleanSemiring().one()
+            True
         """
 
         return True
@@ -412,6 +514,13 @@ class SemiringWithThreshold(Semiring):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import TropicalMaxPlusSemiring, NaturalSemiring
+            >>> TropicalMinPlusSemiring(3).threshold()
+            3
+            >>> NaturalSemiring(9, 27).threshold()
+            9
         """
 
         return self._threshold
@@ -441,6 +550,15 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
     Raises:
         TypeError:  If threshold is not an int.
         ValueError: If threshold is negative.
+
+    Examples:
+        >>> from semigroups import TropicalMaxPlusSemiring
+        >>> TropicalMaxPlusSemiring(26).plus(7, 25)
+        25
+        >>> TropicalMaxPlusSemiring(26).prod(7, 25)
+        26
+        >>> TropicalMaxPlusSemiring(26).threshold()
+        26
     """
 
     def __init__(self, threshold):
@@ -469,15 +587,18 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints or minus infinity.
             ValueError: If either x or y is negative and not minus infinity, or
                         if x or y is greater than the threshold.
+
+        Examples:
+            >>> from semigroups import TropicalMaxPlusSemiring
+            >>> TropicalMaxPlusSemiring(72).plus(-float('inf'), 25)
+            25
         """
 
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
-
         if (x < 0 and x != -float('inf')) or (y < 0 and y != -float('inf')):
             raise ValueError
-
         if (x > self._threshold) or (y > self._threshold):
             raise ValueError
 
@@ -501,15 +622,18 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints or minus infinity.
             ValueError: If either x or y is negative and not minus infinity, or
                         if x or y is greater than the threshold.
+
+        Examples:
+            >>> from semigroups import TropicalMaxPlusSemiring
+            >>> TropicalMaxPlusSemiring(72).prod(-float('inf'), 25)
+            -inf
         """
 
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
-
         if (x < 0 and x != -float('inf')) or (y < 0 and y != -float('inf')):
             raise ValueError
-
         if (x > self._threshold) or (y > self._threshold):
             raise ValueError
 
@@ -526,6 +650,11 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import TropicalMaxPlusSemiring
+            >>> TropicalMaxPlusSemiring(72).zero()
+            -inf
         """
 
         return -float('inf')
@@ -541,6 +670,11 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import TropicalMaxPlusSemiring
+            >>> TropicalMaxPlusSemiring(72).one()
+            0
         """
 
         return 0
@@ -570,6 +704,15 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
     Raises:
         TypeError:  If threshold is not an int.
         ValueError: If threshold is negative.
+
+    Examples:
+        >>> from semigroups import TropicalMinPlusSemiring
+        >>> TropicalMinPlusSemiring(81).plus(7, 37)
+        7
+        >>> TropicalMinPlusSemiring(81).prod(7, 37)
+        44
+        >>> TropicalMinPlusSemiring(10).threshold()
+        10
     """
 
     def __init__(self, threshold):
@@ -598,6 +741,11 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints or plus infinity.
             ValueError: If either x or y is negative and not plus infinity, or
                         if x or y is greater than the threshold.
+
+        Examples:
+            >>> from semigroups import TropicalMinPlusSemiring
+            >>> TropicalMinPlusSemiring(7).plus(float('inf'), 3)
+            3
         """
 
         if not ((isinstance(x, int) or x == float('inf'))
@@ -631,19 +779,21 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints or plus infinity.
             ValueError: If either x or y is negative and not plus infinity, or
                         if x or y is greater than the threshold.
+
+        Examples:
+            >>> from semigroups import TropicalMinPlusSemiring
+            >>> TropicalMinPlusSemiring(7).plus(float('inf'), 3)
+            inf
         """
 
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
             raise TypeError
-
         if x < 0 or y < 0:
             raise ValueError
-
         if ((x > self._threshold and x != float('inf')) or
                 (y > self._threshold and y != float('inf'))):
             raise ValueError
-
         if max(x, y) == float('inf'):
             return x
 
@@ -660,6 +810,11 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import TropicalMinPlusSemiring
+            >>> TropicalMinPlusSemiring(7).zero()
+            inf
         """
 
         return float('inf')
@@ -675,6 +830,11 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+                Examples:
+            >>> from semigroups import TropicalMinPlusSemiring
+            >>> TropicalMinPlusSemiring(7).one()
+            0
         """
 
         return 0
@@ -699,12 +859,22 @@ class NaturalSemiring(SemiringWithThreshold):
     Raises:
         TypeError:  If the threshold and period are not both ints.
         ValueError: If the threshold is negative or the period is not positive.
+
+    Examples:
+        >>> from semigroups import NaturalSemiring
+        >>> NaturalSemiring(3, 4).plus(2, 6)
+        4
+        >>> NaturalSemiring(3, 4).prod(2, 6)
+        4
+        >>> NaturalSemiring(3, 4).threshold()
+        3
+        >>> NaturalSemiring(3, 4).period()
+        4
     """
 
     def __init__(self, threshold, period):
         if not (isinstance(period, int) and isinstance(threshold, int)):
             raise TypeError
-
         if period < 1 or threshold < 0:
             raise ValueError
 
@@ -727,11 +897,15 @@ class NaturalSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints.
             ValueError: If either x or y is negative, or greater than :math:`t
                         + p - 1`.
+
+        Examples:
+            >>> from semigroups import NaturalSemiring
+            >>> NaturalSemiring(5, 7).plus(3, 10)
+            6
         """
 
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
-
         if not ((0 <= x < self._threshold + self._period) and
                 (0 <= y < self._threshold + self._period)):
             raise ValueError
@@ -754,11 +928,15 @@ class NaturalSemiring(SemiringWithThreshold):
             TypeError:  If x and y are not both ints.
             ValueError: If either x or y is negative, or greater than :math:`t
                         + p - 1`.
+
+        Examples:
+            >>> from semigroups import NaturalSemiring
+            >>> NaturalSemiring(5, 7).prod(3, 10)
+            9
         """
 
         if not (isinstance(x, int) and isinstance(y, int)):
             raise TypeError
-
         if not ((0 <= x < self._threshold + self._period) and
                 (0 <= y < self._threshold + self._period)):
             raise ValueError
@@ -774,6 +952,11 @@ class NaturalSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import NaturalSemiring
+            >>> NaturalSemiring(5, 7).period()
+            7
         """
         return self._period
 
@@ -788,6 +971,11 @@ class NaturalSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import NaturalSemiring
+            >>> NaturalSemiring(5, 7).zero()
+            0
         """
         return 0
 
@@ -802,6 +990,11 @@ class NaturalSemiring(SemiringWithThreshold):
 
         Raises:
             TypeError:  If any argument is given.
+
+        Examples:
+            >>> from semigroups import NaturalSemiring
+            >>> NaturalSemiring(5, 7).one()
+            1
         """
 
         return 1
