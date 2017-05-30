@@ -2,8 +2,8 @@
 '''
 This module contains classes for semirings.
 '''
-# pylint: disable = no-member, protected-access, invalid-name,
-# FIXME this is only partially complete
+# pylint: disable = no-member, protected-access, invalid-name
+# pylint: disable = too-few-public-methods
 
 class Semiring:
     r"""
@@ -38,7 +38,8 @@ class Integers(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def plus(self, x, y):
+    @staticmethod
+    def plus(x, y):
         """
         A function to find the sum of two integers, since this is the addition
         operation of the integers
@@ -57,7 +58,8 @@ class Integers(Semiring):
             raise TypeError
         return x + y
 
-    def prod(self, x, y):
+    @staticmethod
+    def prod(x, y):
         """
         A function to find the sum of two integers, since this is the
         multiplication operation of the integers.
@@ -78,7 +80,8 @@ class Integers(Semiring):
 
         return x * y
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the integers, which
         is 0.
@@ -91,7 +94,8 @@ class Integers(Semiring):
         """
         return 0
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the multiplicative identity of the integers, which
         is 1.
@@ -124,7 +128,8 @@ class MaxPlusSemiring(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def plus(self, x, y):
+    @staticmethod
+    def plus(x, y):
         """
         A function to find the maximum of two elements of the max plus
         semiring, since this is the addition operation of the max plus
@@ -147,7 +152,8 @@ class MaxPlusSemiring(Semiring):
 
         return max(x, y)
 
-    def prod(self, x, y):
+    @staticmethod
+    def prod(x, y):
         """
         A function to find the integer sum of two elements of the max plus
         semiring, since this is the addition operation of the max plus
@@ -170,7 +176,8 @@ class MaxPlusSemiring(Semiring):
 
         return x + y
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the max plus
         semiring, which is minus infinity.
@@ -182,9 +189,10 @@ class MaxPlusSemiring(Semiring):
             TypeError:  If any argument is given.
         """
 
-        return self._minus_infinity
+        return -float('inf')
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the multiplicative identity of the max plus
         semiring, which is 0.
@@ -216,7 +224,8 @@ class MinPlusSemiring(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def plus(self, x, y):
+    @staticmethod
+    def plus(x, y):
         """
         A function to find the minimum of two elements of the min plus
         semiring, since this is the addition operation of the min plus
@@ -239,7 +248,8 @@ class MinPlusSemiring(Semiring):
 
         return min(x, y)
 
-    def prod(self, x, y):
+    @staticmethod
+    def prod(x, y):
         """
         A function to find the integer sum of two elements of the min plus
         semiring, since this is the addition operation of the min plus
@@ -262,7 +272,8 @@ class MinPlusSemiring(Semiring):
 
         return x + y
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the min plus
         semiring, which is plus infinity.
@@ -274,9 +285,10 @@ class MinPlusSemiring(Semiring):
             TypeError:  If any argument is given.
         """
 
-        return self._plus_infinity
+        return float('inf')
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the multiplicative identity of the min plus
         semiring, which is 0.
@@ -302,7 +314,8 @@ class BooleanSemiring(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def plus(self, x, y):
+    @staticmethod
+    def plus(x, y):
         """
         A function which returns True if either element is True (the boolean
         'or' function), since this is the additive operation.
@@ -323,7 +336,8 @@ class BooleanSemiring(Semiring):
 
         return x | y
 
-    def prod(self, x, y):
+    @staticmethod
+    def prod(x, y):
         """
         A function which returns False if either element is False (the boolean
         'and' function), since this is the additive operation.
@@ -344,7 +358,8 @@ class BooleanSemiring(Semiring):
 
         return x & y
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the boolean semiring, which
         is False.
@@ -357,7 +372,8 @@ class BooleanSemiring(Semiring):
         """
         return False
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the mutliplicative identity of the boolean semiring,
         which is True.
@@ -399,6 +415,7 @@ class SemiringWithThreshold(Semiring):
         return self._threshold
 
 class TropicalMaxPlusSemiring(SemiringWithThreshold):
+    # pylint: disable = super-init-not-called
     r"""
     The tropical max plus semiring is a semiring comprising the set :math:`\{0,
     \ldots, t\} \cup\{-\infty\}`, for some value :math:`t\in\mathbb{N}_0`, the
@@ -496,7 +513,8 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
         return min(self._threshold, x + y)
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the tropical max plus
         semiring, which is minus infinity.
@@ -510,7 +528,8 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
         return -float('inf')
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the multiplicative identity of the tropical max plus
         semiring, which is 0.
@@ -525,6 +544,7 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         return 0
 
 class TropicalMinPlusSemiring(SemiringWithThreshold):
+    # pylint: disable = super-init-not-called
     r"""
     The tropical min plus semiring is a semiring comprising the set :math:`\{0,
     \ldots, t\} \cup\{-\infty\}`, for some value :math:`t\in\mathbb{N}_0`, the
@@ -585,7 +605,8 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
         if x < 0 or y < 0:
             raise ValueError
 
-        if (x > self._threshold and x != float('inf')) or (y > self._threshold and y != float('inf')):
+        if ((x > self._threshold and x != float('inf')) or
+                (y > self._threshold and y != float('inf'))):
             raise ValueError
 
         return min(x, y)
@@ -617,7 +638,8 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
         if x < 0 or y < 0:
             raise ValueError
 
-        if (x > self._threshold and x != float('inf')) or (y > self._threshold and y != float('inf')):
+        if ((x > self._threshold and x != float('inf')) or
+                (y > self._threshold and y != float('inf'))):
             raise ValueError
 
         if max(x, y) == float('inf'):
@@ -625,7 +647,8 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
         return min(self._threshold, x + y)
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the tropical min plus
         semiring, which is plus infinity.
@@ -639,7 +662,8 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
         return float('inf')
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the multiplicative identity of the tropical min plus
         semiring, which is 0.
@@ -654,6 +678,7 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
         return 0
 
 class NaturalSemiring(SemiringWithThreshold):
+    # pylint: disable = super-init-not-called
     r"""
     Let :math:`t\in\mathbb{N}_0, p\in\mathbb{N}` and :math:`\equiv` be the
     congruence relation on :math:`\mathbb{N}_0` defined by :math:`t\equiv t +
@@ -750,7 +775,8 @@ class NaturalSemiring(SemiringWithThreshold):
         """
         return self._period
 
-    def zero(self):
+    @staticmethod
+    def zero():
         """
         A function to find the additive identity of the Natural Semiring, which
         is 0.
@@ -763,7 +789,8 @@ class NaturalSemiring(SemiringWithThreshold):
         """
         return 0
 
-    def one(self):
+    @staticmethod
+    def one():
         """
         A function to find the multiplicative identity of the Natural Semiring,
         which is 1.
