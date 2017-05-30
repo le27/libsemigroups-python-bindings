@@ -44,9 +44,6 @@ class Integers(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def __init___(self):
-        pass
-
     def plus(self, x, y):
         """
         A function to find the sum of two integers, since this is the addition
@@ -141,9 +138,6 @@ class MaxPlusSemiring(Semiring):
     Raises:
         TypeError:  If any argument is given.
     """
-
-    def __init___(self):
-        pass
 
     def plus(self, x, y):
         """
@@ -246,9 +240,6 @@ class MinPlusSemiring(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def __init___(self):
-        pass
-
     def plus(self, x, y):
         """
         A function to find the minimum of two elements of the min plus
@@ -343,9 +334,6 @@ class BooleanSemiring(Semiring):
     Raises:
         TypeError:  If any argument is given.
     """
-
-    def __init__(self):
-        pass
 
     def plus(self, x, y):
         """
