@@ -436,9 +436,6 @@ class SemiringWithThreshold(Semiring):
         TypeError:  If any argument is given.
     """
 
-    def __init__(self):
-        pass
-
     def threshold(self):
         """
         A function to find the threshold of a semiring.
@@ -478,12 +475,14 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         ValueError: If threshold is negative.
     """
 
-    def __init___(self, threshold):
+    def __init__(self, threshold):
         if not isinstance(threshold, int):
             raise TypeError
 
         if threshold < 0:
             raise ValueError
+
+        super().__init__()
 
         self._threshold = threshold
 
