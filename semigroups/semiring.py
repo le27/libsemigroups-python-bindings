@@ -482,8 +482,6 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
         if threshold < 0:
             raise ValueError
 
-        super().__init__()
-
         self._threshold = threshold
 
     def plus(self, x, y):
@@ -505,11 +503,11 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
                         if x or y is greater than the threshold.
         """
 
-        if not ((isinstance(x, int) or x == self._minus_infinity)
-                and (isinstance(y, int) or y == self._minus_infinity)):
+        if not ((isinstance(x, int) or x == -float('inf'))
+                and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
 
-        if (x < 0 and x != self._minus_infinity) or (y < 0 and y != self._minus_infinity):
+        if (x < 0 and x != -float('inf')) or (y < 0 and y != -float('inf')):
             raise ValueError
 
         if (x > self._threshold) or (y > self._threshold):
@@ -537,11 +535,11 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
                         if x or y is greater than the threshold.
         """
 
-        if not ((isinstance(x, int) or x == self._minus_infinity)
-                and (isinstance(y, int) or y == self._minus_infinity)):
+        if not ((isinstance(x, int) or x == -float('inf'))
+                and (isinstance(y, int) or y == -float('inf'))):
             raise TypeError
 
-        if (x < 0 and x != self._minus_infinity) or (y < 0 and y != self._minus_infinity):
+        if (x < 0 and x != -float('inf')) or (y < 0 and y != -float('inf')):
             raise ValueError
 
         if (x > self._threshold) or (y > self._threshold):
@@ -564,7 +562,7 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             TypeError:  If any argument is given.
         """
 
-        return self._minus_infinity
+        return -float('inf')
 
     def one(self):
         """
