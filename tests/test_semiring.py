@@ -12,7 +12,7 @@ del path
 
 class TestIntegers(unittest.TestCase):
     def test_init(self):
-        Integers()
+        self.assertEqual(Integers().__init__(), None)
 
         with self.assertRaises(TypeError):
             Integers(10)
@@ -228,8 +228,8 @@ class TestTropicalMaxPlusSemiring(unittest.TestCase):
             TropicalMaxPlusSemiring(3).plus(0, '2')
         with self.assertRaises(TypeError):
             TropicalMaxPlusSemiring(8000).plus(0, float('inf'))
-        with self.assertRaises(TypeError):
-            TropicalMaxPlusSemiring(8000).plus(0)        
+        with self.assertRaises(ValueError):
+            TropicalMaxPlusSemiring(8000).plus(0, -5)
 
     def test_prod(self):
         self.assertEqual(TropicalMaxPlusSemiring(10).prod(7, 3), 10)
@@ -246,8 +246,8 @@ class TestTropicalMaxPlusSemiring(unittest.TestCase):
             TropicalMaxPlusSemiring(3).prod(0, '2')
         with self.assertRaises(TypeError):
             TropicalMaxPlusSemiring(8000).prod(0, float('inf'))
-        with self.assertRaises(TypeError):
-            TropicalMaxPlusSemiring(8000).prod(0) 
+        with self.assertRaises(ValueError):
+            TropicalMaxPlusSemiring(8000).prod(0, -5)
 
     def test_zero(self):
         self.assertEqual(TropicalMaxPlusSemiring(10).zero(), -float('inf'))
@@ -260,6 +260,12 @@ class TestTropicalMaxPlusSemiring(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             TropicalMaxPlusSemiring(7).one(26)
+
+    def test_threshold(self):
+        self.assertEqual(TropicalMaxPlusSemiring(20).threshold(), 20)
+
+        with self.assertRaises(TypeError):
+            TropicalMaxPlusSemiring(83).threshold(1)
 
 if __name__ == '__main__':
     unittest.main()
