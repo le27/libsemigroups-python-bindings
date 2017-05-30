@@ -7,14 +7,16 @@ This module contains classes for semirings.
 
 class Semiring:
     r"""
-    A semiring is a set :math:`R`, together with two binary operations,
+    A *semiring* is a set :math:`R`, together with two binary operations,
     :math:`+, \times`, such that :math:`(R, +)` is a commutative monoid,
     with identity called 0, :math:`(R\backslash\{0\},\times)` is a
     monoid, with identity 1, :math:`(R, +, \times)` is left and right
     distributive (ie :math:`\forall a, b, c \in R \quad a(b + c) = ab + ac` and
     :math:`\forall a, b, c \in R \quad (a + b)c = ac + bc`), and multiplication
-    by zero must annihilate :math:`R`, that is :math:`\forall a \in R \quad
+    by zero must *annihilate* :math:`R`, that is :math:`\forall a \in R \quad
     a \cdot 0 = 0 \cdot a = 0`.
+
+    This abstract class provides common methods for its subclasses.
 
     Returns:
         None
@@ -112,7 +114,7 @@ class Integers(Semiring):
 
 class MaxPlusSemiring(Semiring):
     r"""
-    The max plus semiring is a semiring comprising the set
+    The *max plus semiring* is a semiring comprising the set
     :math:`\mathbb{Z}\cup\{-\infty\}`, together with an operation which
     returns the maximum of two elements, as the additive operation and addition
     as the multiplicative operation.
@@ -208,7 +210,7 @@ class MaxPlusSemiring(Semiring):
 
 class MinPlusSemiring(Semiring):
     r"""
-    The min plus semiring is a semiring comprising the set
+    The *min plus semiring* is a semiring comprising the set
     :math:`\mathbb{Z}\cup\{\infty\}`, together with an operation which
     returns the maximum of two elements, as the additive operation and addition
     as the multiplicative operation.
@@ -304,7 +306,7 @@ class MinPlusSemiring(Semiring):
 
 class BooleanSemiring(Semiring):
     r"""
-    The boolean semiring is a semiring comprising the set :math:`\{\text{True},
+    The *boolean semiring* is a semiring comprising the set :math:`\{\text{True},
     \text{False} \}`, together with the operations 'or' and 'and'.
 
     Returns:
@@ -389,8 +391,8 @@ class BooleanSemiring(Semiring):
 
 class SemiringWithThreshold(Semiring):
     """
-    A semiring with a threshold is a semiring is a semiring with a largest
-    finite value, the threshold.
+    A *semiring with a threshold* is a semiring is a semiring with a largest
+    finite value, the *threshold*.
 
     This abstract class provides common methods for its subclasses.
 
@@ -417,15 +419,15 @@ class SemiringWithThreshold(Semiring):
 class TropicalMaxPlusSemiring(SemiringWithThreshold):
     # pylint: disable = super-init-not-called
     r"""
-    The tropical max plus semiring is a semiring comprising the set :math:`\{0,
+    A *tropical max plus semiring* is a semiring comprising the set :math:`\{0,
     \ldots, t\} \cup\{-\infty\}`, for some value :math:`t\in\mathbb{N}_0`, the
     threshold of the semiring, together with an operation which returns the
     maximum of two elements, as the additive operation and addition of integers
     as the multiplicative operation.
 
     Minus infinity is a defined as smaller than all integers, and the integer
-    sum of minus infinity and any element of the max plus semiring is minus
-    infinity.
+    sum of minus infinity and any element of the tropical max plus semiring is
+    minus infinity.
 
     If the integer sum of any two elements is greater than the threshold, then
     the product is the threshold.
@@ -452,8 +454,8 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
     def plus(self, x, y):
         """
-        A function to find the maximum of two elements of the tropical max plus
-        semiring, since this is the addition operation of the tropical max plus
+        A function to find the maximum of two elements of a tropical max plus
+        semiring, since this is the addition operation of a tropical max plus
         semiring.
 
         Args:
@@ -483,10 +485,10 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
     def prod(self, x, y):
         """
-        A function to find the integer sum of two elements of the tropical max
-        plus semiring, since this is the addition operation of the max plus
-        semiring. If the integer sum is greater than :math:`t`, then the result
-        is :math:`t`.
+        A function to find the integer sum of two elements of a tropical max
+        plus semiring, since this is the addition operation of a tropical max
+        plus semiring. If the integer sum is greater than :math:`t`, then the
+        result is :math:`t`.
 
         Args:
             x (int or float):    One of the elements to be multiplied.
@@ -516,7 +518,7 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
     @staticmethod
     def zero():
         """
-        A function to find the additive identity of the tropical max plus
+        A function to find the additive identity of a tropical max plus
         semiring, which is minus infinity.
 
         Returns:
@@ -531,7 +533,7 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
     @staticmethod
     def one():
         """
-        A function to find the multiplicative identity of the tropical max plus
+        A function to find the multiplicative identity of a tropical max plus
         semiring, which is 0.
 
         Returns:
@@ -546,7 +548,7 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 class TropicalMinPlusSemiring(SemiringWithThreshold):
     # pylint: disable = super-init-not-called
     r"""
-    The tropical min plus semiring is a semiring comprising the set :math:`\{0,
+    A *tropical min plus semiring* is a semiring comprising the set :math:`\{0,
     \ldots, t\} \cup\{-\infty\}`, for some value :math:`t\in\mathbb{N}_0`, the
     threshold of the semiring, together with an operation which returns the
     maximum of two elements, as the additive operation and addition of integers
@@ -581,8 +583,8 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
     def plus(self, x, y):
         """
-        A function to find the maximum of two elements of the tropical min plus
-        semiring, since this is the addition operation of the tropical min plus
+        A function to find the maximum of two elements of a tropical min plus
+        semiring, since this is the addition operation of a tropical min plus
         semiring.
 
         Args:
@@ -613,10 +615,10 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
     def prod(self, x, y):
         """
-        A function to find the integer sum of two elements of the tropical min
-        plus semiring, since this is the addition operation of the min plus
-        semiring. If the integer sum is greater than :math:`t`, then the result
-        is :math:`t`.
+        A function to find the integer sum of two elements of a tropical min
+        plus semiring, since this is the addition operation of a tropical min
+        plus semiring. If the integer sum is greater than :math:`t`, then the
+        result is :math:`t`.
 
         Args:
             x (int or float):    One of the elements to be multiplied.
@@ -650,7 +652,7 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
     @staticmethod
     def zero():
         """
-        A function to find the additive identity of the tropical min plus
+        A function to find the additive identity of a tropical min plus
         semiring, which is plus infinity.
 
         Returns:
@@ -665,7 +667,7 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
     @staticmethod
     def one():
         """
-        A function to find the multiplicative identity of the tropical min plus
+        A function to find the multiplicative identity of a tropical min plus
         semiring, which is 0.
 
         Returns:
@@ -682,10 +684,10 @@ class NaturalSemiring(SemiringWithThreshold):
     r"""
     Let :math:`t\in\mathbb{N}_0, p\in\mathbb{N}` and :math:`\equiv` be the
     congruence relation on :math:`\mathbb{N}_0` defined by :math:`t\equiv t +
-    p`. The natural semiring is a semiring comprising the set :math:`\{0,
+    p`. A *natural semiring* is a semiring comprising the set :math:`\{0,
     \ldots, p + t - 1\}`, together with addition and multiplication of naturals
-    modulo :math:`\equiv`. Then :math:`t` is the threshold of the semiring and
-    :math:`p` is the period.
+    modulo :math:`\equiv`. Then :math:`t` is called the *threshold* of the
+    semiring and :math:`p` is the *period*.
 
     Args:
         threshold (int):    The threshold of the semiring.
@@ -712,7 +714,7 @@ class NaturalSemiring(SemiringWithThreshold):
     def plus(self, x, y):
         r"""
         A function to find the integer sum modulo :math:`\equiv`, of two
-        elements of the natural semiring.
+        elements of a natural semiring.
 
         Args:
             x (int):    One of the elements to be added.
@@ -739,7 +741,7 @@ class NaturalSemiring(SemiringWithThreshold):
     def prod(self, x, y):
         r"""
         A function to find the integer p modulo :math:`\equiv`, of two
-        elements of the natural semiring.
+        elements of a natural semiring.
 
         Args:
             x (int):    One of the elements to be added.
@@ -765,7 +767,7 @@ class NaturalSemiring(SemiringWithThreshold):
 
     def period(self):
         """
-        A function to find the period of the Natural Semiring instance.
+        A function to find the period of a Natural Semiring instance.
 
         Returns:
             int:    period.
@@ -778,7 +780,7 @@ class NaturalSemiring(SemiringWithThreshold):
     @staticmethod
     def zero():
         """
-        A function to find the additive identity of the Natural Semiring, which
+        A function to find the additive identity of a natural semiring, which
         is 0.
 
         Returns:
@@ -792,7 +794,7 @@ class NaturalSemiring(SemiringWithThreshold):
     @staticmethod
     def one():
         """
-        A function to find the multiplicative identity of the Natural Semiring,
+        A function to find the multiplicative identity of a natural semiring,
         which is 1.
 
         Returns:
