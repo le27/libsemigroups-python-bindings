@@ -49,7 +49,7 @@ class Semigroup(libsemigroups.SemigroupNC):
             return
 
         elif len(args) == 0:
-            ValueError('there must be at least 1 argument')
+            raise ValueError('there must be at least 1 argument')
 
         elt_type = type(args[0])
         for elt in args:
