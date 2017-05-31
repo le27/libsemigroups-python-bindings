@@ -211,7 +211,7 @@ class MaxPlusSemiring(Semiring):
         Examples:
             >>> from semigroups import MaxPlusSemiring
             >>> MaxPlusSemiring().prod(7, -20)
-            -140
+            -13
         """
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
@@ -329,8 +329,8 @@ class MinPlusSemiring(Semiring):
 
         Examples:
             >>> from semigroups import MinPlusSemiring
-            >>> MinPlusSemiring().plus(37, 73)
-            73
+            >>> MinPlusSemiring().prod(37, 73)
+            110
         """
 
         if not ((isinstance(x, int) or x == float('inf'))
@@ -782,7 +782,7 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
         Examples:
             >>> from semigroups import TropicalMinPlusSemiring
-            >>> TropicalMinPlusSemiring(7).plus(float('inf'), 3)
+            >>> TropicalMinPlusSemiring(7).prod(float('inf'), 3)
             inf
         """
 
