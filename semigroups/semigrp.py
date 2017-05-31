@@ -1,7 +1,7 @@
 '''
 This module contains classes for representing semigroups.
 '''
-# pylint: disable = no-member, protected-access, invalid-name,
+# pylint: disable = no-member, protected-access, invalid-name, len-as-condition
 
 import libsemigroups
 from semigroups.elements import Transformation
