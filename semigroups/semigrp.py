@@ -35,7 +35,11 @@ def FullTransformationMonoid(n):
     '''
     Returns the full transformation monoid of degree n.
     '''
-    assert isinstance(n, int) and n >= 1
+    if not isinstance(n, int):
+        raise TypeError('degree of transformation must be an int')
+    if n < 1:
+        raise ValueError('degree of transformation must be positive')
+
     if n == 1:
         return Semigroup(Transformation([0]))
     elif n == 2:
