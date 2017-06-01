@@ -69,7 +69,7 @@ class Integers(Semiring):
             -3
         """
         if not (isinstance(x, int) and isinstance(y, int)):
-            raise TypeError
+            raise TypeError('Arguments must be ints')
         return x + y
 
     @staticmethod
@@ -94,7 +94,7 @@ class Integers(Semiring):
             -26
         """
         if not (isinstance(x, int) and isinstance(y, int)):
-            raise TypeError
+            raise TypeError('Arguments must be ints')
 
         return x * y
 
@@ -134,7 +134,6 @@ class Integers(Semiring):
             >>> Integers().one()
             1
         """
-
         return 1
 
 
@@ -185,9 +184,10 @@ class MaxPlusSemiring(Semiring):
             >>> MaxPlusSemiring().plus(7, -20)
             7
         """
+        err_msg = 'Arguments must be in max plus semiring; either ints or -inf'
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
-            raise TypeError
+            raise TypeError(err_msg)
 
         return max(x, y)
 
@@ -213,9 +213,10 @@ class MaxPlusSemiring(Semiring):
             >>> MaxPlusSemiring().prod(7, -20)
             -13
         """
+        err_msg = 'Arguments must be in max plus semiring; either ints or -inf'
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
-            raise TypeError
+            raise TypeError(err_msg)
 
         return x + y
 
@@ -304,9 +305,10 @@ class MinPlusSemiring(Semiring):
             >>> MinPlusSemiring().plus(37, 73)
             37
         """
+        err_msg = 'Arguments must be in min plus semiring; either ints or inf'
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
-            raise TypeError
+            raise TypeError(err_msg)
 
         return min(x, y)
 
@@ -332,10 +334,10 @@ class MinPlusSemiring(Semiring):
             >>> MinPlusSemiring().prod(37, 73)
             110
         """
-
+        err_msg = 'Arguments must be in min plus semiring; either ints or inf'
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
-            raise TypeError
+            raise TypeError(err_msg)
 
         return x + y
 
@@ -356,7 +358,6 @@ class MinPlusSemiring(Semiring):
             >>> MinPlusSemiring().zero()
             inf
         """
-
         return float('inf')
 
     @staticmethod
@@ -376,7 +377,6 @@ class MinPlusSemiring(Semiring):
             >>> MinPlusSemiring().one()
             0
         """
-
         return 0
 
 class BooleanSemiring(Semiring):
@@ -419,9 +419,9 @@ class BooleanSemiring(Semiring):
             >>> BooleanSemiring().plus(True, True)
             True
         """
-
+        err_msg = 'Arguments must be in boolean semiring; either True or False'
         if not (isinstance(x, type(True)) and isinstance(y, type(True))):
-            raise TypeError
+            raise TypeError(err_msg)
 
         return x | y
 
@@ -446,9 +446,9 @@ class BooleanSemiring(Semiring):
             >>> BooleanSemiring().prod(True, True)
             True
         """
-
+        err_msg = 'Arguments must be in boolean semiring; either True or False'
         if not (isinstance(x, type(True)) and isinstance(y, type(True))):
-            raise TypeError
+            raise TypeError(err_msg)
 
         return x & y
 
@@ -563,10 +563,10 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
     def __init__(self, threshold):
         if not isinstance(threshold, int):
-            raise TypeError
+            raise TypeError('Threshold must be an int')
 
         if threshold < 0:
-            raise ValueError
+            raise ValueError('Threshold must be non-negative')
 
         self._threshold = threshold
 
@@ -593,14 +593,13 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             >>> TropicalMaxPlusSemiring(72).plus(-float('inf'), 25)
             25
         """
-
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
-            raise TypeError
+            raise TypeError('Arguments must be ints or -inf')
         if (x < 0 and x != -float('inf')) or (y < 0 and y != -float('inf')):
-            raise ValueError
+            raise ValueError('Arguments must be positive')
         if (x > self._threshold) or (y > self._threshold):
-            raise ValueError
+            raise ValueError('Arguments must not be greater than the threshold')
 
         return max(x, y)
 
@@ -631,11 +630,11 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
 
         if not ((isinstance(x, int) or x == -float('inf'))
                 and (isinstance(y, int) or y == -float('inf'))):
-            raise TypeError
+            raise TypeError('Arguments must be ints or -inf')
         if (x < 0 and x != -float('inf')) or (y < 0 and y != -float('inf')):
-            raise ValueError
+            raise ValueError('Arguments must be positive')
         if (x > self._threshold) or (y > self._threshold):
-            raise ValueError
+            raise ValueError('Arguments must not be greater than the threshold')
 
         return min(self._threshold, x + y)
 
@@ -656,7 +655,6 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             >>> TropicalMaxPlusSemiring(72).zero()
             -inf
         """
-
         return -float('inf')
 
     @staticmethod
@@ -676,7 +674,6 @@ class TropicalMaxPlusSemiring(SemiringWithThreshold):
             >>> TropicalMaxPlusSemiring(72).one()
             0
         """
-
         return 0
 
 class TropicalMinPlusSemiring(SemiringWithThreshold):
@@ -717,10 +714,10 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
     def __init__(self, threshold):
         if not isinstance(threshold, int):
-            raise TypeError
+            raise TypeError('Threshold must be an int')
 
         if threshold < 0:
-            raise ValueError
+            raise ValueError('Threshold must be non-negative')
 
         self._threshold = threshold
 
@@ -747,17 +744,16 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
             >>> TropicalMinPlusSemiring(7).plus(float('inf'), 3)
             3
         """
-
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
-            raise TypeError
+            raise TypeError('Arguments must be ints or inf')
 
         if x < 0 or y < 0:
-            raise ValueError
+            raise ValueError('Arguments must not be negative')
 
         if ((x > self._threshold and x != float('inf')) or
                 (y > self._threshold and y != float('inf'))):
-            raise ValueError
+            raise ValueError('Arguments must not be greater than the threshold')
 
         return min(x, y)
 
@@ -788,12 +784,12 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
 
         if not ((isinstance(x, int) or x == float('inf'))
                 and (isinstance(y, int) or y == float('inf'))):
-            raise TypeError
+            raise TypeError('Arguments must be ints or inf')
         if x < 0 or y < 0:
-            raise ValueError
+            raise ValueError('Arguments must not be negative')
         if ((x > self._threshold and x != float('inf')) or
                 (y > self._threshold and y != float('inf'))):
-            raise ValueError
+            raise ValueError('Arguments must not be greater than the threshold')
         if max(x, y) == float('inf'):
             return x
 
@@ -816,7 +812,6 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
             >>> TropicalMinPlusSemiring(7).zero()
             inf
         """
-
         return float('inf')
 
     @staticmethod
@@ -836,7 +831,6 @@ class TropicalMinPlusSemiring(SemiringWithThreshold):
             >>> TropicalMinPlusSemiring(7).one()
             0
         """
-
         return 0
 
 class NaturalSemiring(SemiringWithThreshold):
@@ -874,9 +868,12 @@ class NaturalSemiring(SemiringWithThreshold):
 
     def __init__(self, threshold, period):
         if not (isinstance(period, int) and isinstance(threshold, int)):
-            raise TypeError
-        if period < 1 or threshold < 0:
-            raise ValueError
+            raise TypeError('Threshold and period must both be ints')
+        if period < 1:
+            raise ValueError('Period must be positive')
+
+        if threshold < 0:
+            raise ValueError('Threshold must be non-negative')
 
         self._period = period
         self._threshold = threshold
@@ -903,12 +900,14 @@ class NaturalSemiring(SemiringWithThreshold):
             >>> NaturalSemiring(5, 7).plus(3, 10)
             6
         """
-
+        err_msg = 'Arguments must not be greater than threshold + period'
         if not (isinstance(x, int) and isinstance(y, int)):
-            raise TypeError
-        if not ((0 <= x < self._threshold + self._period) and
-                (0 <= y < self._threshold + self._period)):
-            raise ValueError
+            raise TypeError('Arguments must be ints')
+        if not (x < self._threshold + self._period and
+                y < self._threshold + self._period):
+            raise ValueError(err_msg)
+        if x < 0 or y < 0:
+            raise ValueError('Arguments must be non-negative')
 
         return (x + y - self._threshold) % self._period + self._threshold
 
@@ -934,12 +933,14 @@ class NaturalSemiring(SemiringWithThreshold):
             >>> NaturalSemiring(5, 7).prod(3, 10)
             9
         """
-
+        err_msg = 'Arguments must not be greater than threshold + period'
         if not (isinstance(x, int) and isinstance(y, int)):
-            raise TypeError
-        if not ((0 <= x < self._threshold + self._period) and
-                (0 <= y < self._threshold + self._period)):
-            raise ValueError
+            raise TypeError('Arguments must be ints')
+        if not (x < self._threshold + self._period and
+                y < self._threshold + self._period):
+            raise ValueError(err_msg)
+        if x < 0 or y < 0:
+            raise ValueError('Arguments must be non-negative')
 
         return (x * y - self._threshold) % self._period + self._threshold
 
@@ -996,5 +997,4 @@ class NaturalSemiring(SemiringWithThreshold):
             >>> NaturalSemiring(5, 7).one()
             1
         """
-
         return 1
