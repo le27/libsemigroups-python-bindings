@@ -57,9 +57,12 @@ class Semigroup(libsemigroups.SemigroupNC):
                 raise TypeError('generators must be of the same type')
 
         err_msg = 'generators must have a multiplication defined on them'
-        if ((not isinstance(args[0], ElementABC)) and
-                (not hasattr(args[0], '__mul__'))):
-            raise TypeError(err_msg)
+        x = args[0]
+        if not isinstance(x, ElementABC):
+            try:
+                x * x
+            except:
+                raise TypeError(err_msg)
 
         gens = [g if isinstance(g, ElementABC) else PythonElementNC(g)
                 for g in args]
