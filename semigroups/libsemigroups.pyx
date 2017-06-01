@@ -31,6 +31,8 @@ from libc.stdint cimport uint32_t
 
 from cysignals.signals cimport sig_on, sig_off
 
+import networkx
+
 cdef class ElementABC:
     """
     This abstract class provides common methods for its subclasses.
@@ -489,6 +491,7 @@ cdef class SemigroupNC:
         """
         return self._handle.is_begun()
     
+    #TODO Replace with position
     def current_position(self, ElementABC x):
         """
         A function for finding the position that an enumerated element is
@@ -586,7 +589,30 @@ cdef class SemigroupNC:
         del c_word
         return py_word
     
-    def enumerate(self, limit):
+    def enumerate(self, limit = 18446744073709551615):
+        """
+        Function for enumerating elements of a semigroup. If limit is not set,
+        the function will attempt to completely enumerate the semigroup.
+        Otherwise, it will continue until the number of elements found is
+        greater than or equal to limit.
+
+        Uses the Froidure-Pin algorithm.
+
+        Args:
+            limit (int): The number of elements to be found before terminating.
+
+        Returns:
+            None
+
+        Examples:
+            >>> from semigroups import FullTransformationMonoid
+            >>> S = FullTransformationMonoid(50)
+            >>> S.enumerate(5)
+            >>> S.is_begun()
+            True
+            >>> S.is_done()
+            False
+        """
         self._handle.enumerate(limit)
 
     cdef new_from_handle(self, libsemigroups.Element* handle):
@@ -641,6 +667,27 @@ cdef class SemigroupNC:
                 yield self.new_from_handle(element)
             pos += 1
 
+    def right_cayley_graph(self):
+        cdef libsemigroups.RecVec[size_t]* c_graph = self._handle.right_cayley_graph()
+        adjacencies_list = []
+        for i in range(c_graph[0].nr_rows()):
+            adjacencies_list.append([])
+            for j in range(c_graph[0].nr_cols()):
+                x = c_graph.get(i, j)
+                adjacencies_list[-1].append(x)
+
+        edge_list = []
+        node_list = []
+        G = networkx.DiGraph(edge_list)
+        for i, adjacencies in enumerate(adjacencies_list):
+            for adj in adjacencies:
+                edge_list.append((i, adj))
+            node_list.append(i)
+                
+        G = networkx.DiGraph()
+        G.add_nodes_from(node_list)
+        G.add_edges_from(edge_list)
+        return G        
 
 # FIXME should be a subclass of SemigroupNC
 cdef class FpSemigroupNC:
