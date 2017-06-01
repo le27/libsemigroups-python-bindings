@@ -47,14 +47,10 @@ class Semigroup(libsemigroups.SemigroupNC):
         if len(args) == 1 and isinstance(args[0], list):
             self.__init__(*args[0])
             return
-
         elif len(args) == 0:
             raise ValueError('there must be at least 1 argument')
-
-        elt_type = type(args[0])
-        for elt in args:
-            if not isinstance(elt, elt_type):
-                raise TypeError('generators must be of the same type')
+        elif not all(map(lambda elt: isinstance(elt, type(args[0])), args)):
+            raise TypeError('generators must be of the same type')
 
         err_msg = 'generators must have a multiplication defined on them'
         x = args[0]
