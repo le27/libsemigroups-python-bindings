@@ -487,7 +487,6 @@ cdef class FpSemigroupNC(SemigroupNC):
         return [self.__convert_word(w) for w in rel]
 
     def __init__(self, nrgens, rels):
-
         rels = [self.__convert_rel(rel) for rel in rels]
         self._congruence = new libsemigroups.Congruence("twosided",
                                                         nrgens,
@@ -500,7 +499,6 @@ cdef class FpSemigroupNC(SemigroupNC):
         del self._rws
 
     def size(self):
-
         sig_on()
         try:
             return self._congruence.nr_classes()

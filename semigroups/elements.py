@@ -511,3 +511,4 @@ class PBR(libsemigroups.PBRNC):
                     self.__neg_out_neighbours.append(sorted(copy))
         return ('PBR(%s, %s)'
                 % (self.__pos_out_neighbours, self.__neg_out_neighbours))
+

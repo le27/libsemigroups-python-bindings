@@ -27,7 +27,11 @@ class Semigroup(libsemigroups.SemigroupNC):
             ValueError('there must be at least 1 argument')
 
         gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
+<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
                       "<class 'semigroups.semifp._FPSOME'>")
+=======
+                      "<class 'semigroups.semifp.FPSOME'>")
+>>>>>>> semifp: Semigroup parent class compatability
                 else PythonElementNC(g) for g in args]
         libsemigroups.SemigroupNC.__init__(self, gens)
 
