@@ -25,12 +25,6 @@ class CayleyGraph:
         self._graph.add_node(node)
 
     def _add_edge_with_label(self, label, edge):
-        if not isinstance(edge, tuple):
-            raise TypeError('edge must be a tuple')
-        if not isinstance(label, int):
-            raise TypeError('label must be an int')
-        if label < 0:
-            raise ValueError('label must be non-negative')
         self._graph.add_edge(*edge)
         self._label_edge_list.append((label, edge))
 
