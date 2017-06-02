@@ -68,12 +68,13 @@ class Semigroup(libsemigroups.SemigroupNC):
         adjacencies_list = super().right_cayley_graph()
 
         G = CayleyGraph()
+        G._adjacencies_list = super().right_cayley_graph()
         for i, adjacencies in enumerate(adjacencies_list):
             G.add_node(i)
 
         for i, adjacencies in enumerate(adjacencies_list):
             for j, adj in enumerate(adjacencies):
-                G.add_edge_with_label(j, (i, adj))
+                G._add_edge_with_label(j, (i, adj))
         return G
 
 def FullTransformationMonoid(n):
