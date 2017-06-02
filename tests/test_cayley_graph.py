@@ -10,12 +10,31 @@ if path not in sys.path:
     sys.path.insert(1, path)
 del path
 
-class CayleyGraph(unittest.TestCase):
+class TestCayleyGraph(unittest.TestCase):
     def test_init(self):
         self.assertEqual(CayleyGraph().__init__(), None)
 
         with self.assertRaises(TypeError):
             CayleyGraph(1)
+
+    def test_eq(self):
+        G = Semigroup(Transformation([0, 1, 1]), 
+                       Transformation([0, 0, 0])).right_cayley_graph()
+        H = Semigroup(Transformation([0, 1, 1]), 
+                       Transformation([0, 0, 0])).right_cayley_graph()
+        self.assertEqual(G, H)
+        G = FullTransformationMonoid(3).right_cayley_graph()
+        H = FullTransformationMonoid(3).right_cayley_graph()
+        self.assertEqual(G, H)
+
+    def test_ne(self):
+        G = Semigroup(Transformation([0, 1, 1])).right_cayley_graph()
+        H = Semigroup(Transformation([0, 1, 1]), 
+                       Transformation([0, 0, 0])).right_cayley_graph()
+        self.assertNotEqual(G, H)
+        G = FullTransformationMonoid(3).right_cayley_graph()
+        H = FullTransformationMonoid(4).right_cayley_graph()
+        self.assertNotEqual(G, H)
 
     def test_ordered_adjacencies(self):
         G = Semigroup(Transformation([0, 1, 1]), 
