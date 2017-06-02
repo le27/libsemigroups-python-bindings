@@ -31,8 +31,6 @@ from libc.stdint cimport uint32_t
 
 from cysignals.signals cimport sig_on, sig_off
 
-import networkx
-
 cdef class ElementABC:
     """
     This abstract class provides common methods for its subclasses.
@@ -676,18 +674,7 @@ cdef class SemigroupNC:
                 x = c_graph.get(i, j)
                 adjacencies_list[-1].append(x)
 
-        edge_list = []
-        node_list = []
-        G = networkx.DiGraph(edge_list)
-        for i, adjacencies in enumerate(adjacencies_list):
-            for adj in adjacencies:
-                edge_list.append((i, adj))
-            node_list.append(i)
-                
-        G = networkx.DiGraph()
-        G.add_nodes_from(node_list)
-        G.add_edges_from(edge_list)
-        return G        
+        return adjacencies_list    
 
 # FIXME should be a subclass of SemigroupNC
 cdef class FpSemigroupNC:
