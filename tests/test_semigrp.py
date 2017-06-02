@@ -2,7 +2,7 @@ import unittest
 import sys
 import os
 from semigroups import (Semigroup, Transformation, Bipartition,
-                        FullTransformationMonoid)
+                        FullTransformationMonoid, CayleyGraph)
 
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if path not in sys.path:
@@ -23,6 +23,10 @@ class TestSemigroup(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             Semigroup({2, 3})
+
+    def test_right_cayley_graph(self):
+        Semigroup(-1).right_cayley_graph()
+#       self.assertEqual(type(Semigroup(-1).right_cayley_graph()), CayleyGraph)
 
 class TestOtherFunctions(unittest.TestCase):
     def test_FullTransformationMonoid(self):
