@@ -65,14 +65,11 @@ class Semigroup(libsemigroups.SemigroupNC):
         libsemigroups.SemigroupNC.__init__(self, gens)
 
     def right_cayley_graph(self):
-        adjacencies_list = super().right_cayley_graph()
-
         G = CayleyGraph()
-        G._adjacencies_list = super().right_cayley_graph()
-        for i, adjacencies in enumerate(adjacencies_list):
+        G._adjacencies_list = libsemigroups.SemigroupNC.right_cayley_graph(self)
+        for i, adjacencies in enumerate(G._adjacencies_list):
             G._add_node(i)
-
-        for i, adjacencies in enumerate(adjacencies_list):
+        for i, adjacencies in enumerate(G._adjacencies_list):
             for j, adj in enumerate(adjacencies):
                 G._add_edge_with_label(j, (i, adj))
         return G
