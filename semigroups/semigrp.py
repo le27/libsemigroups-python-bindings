@@ -5,8 +5,8 @@ This module contains classes for representing semigroups.
 
 import libsemigroups
 from semigroups.elements import Transformation
+from semigroups.cayley_graph import CayleyGraph
 from libsemigroups import ElementABC, PythonElementNC
-
 
 class Semigroup(libsemigroups.SemigroupNC):
     r'''
@@ -64,6 +64,17 @@ class Semigroup(libsemigroups.SemigroupNC):
                 for g in args]
         libsemigroups.SemigroupNC.__init__(self, gens)
 
+    def right_cayley_graph(self):
+        adjacencies_list = super().right_cayley_graph()
+
+        G = CayleyGraph()
+        for i, adjacencies in enumerate(adjacencies_list):
+            G.add_node(i)
+
+        for i, adjacencies in enumerate(adjacencies_list):
+            for j, adj in enumerate(adjacencies):
+                G.add_edge_with_label(j, (i, adj))
+        return G
 
 def FullTransformationMonoid(n):
     r'''
