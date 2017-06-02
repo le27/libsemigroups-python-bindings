@@ -8,7 +8,7 @@ import networkx
 
 class CayleyGraph:
     """
-    A class for representing right Cayley graphs of semigroups.
+    A class for representing right and left Cayley graphs of semigroups.
     """
 
     def __init__(self):
@@ -30,6 +30,12 @@ class CayleyGraph:
 
     def ordered_adjacencies(self):
         return self._adjacencies_list
+
+    def edges(self):
+        return list(map(lambda x: x[1], self._label_edge_list))
+
+    def nodes(self):
+        return self._graph.nodes()
 
     def strongly_connected_components(self):
         return list(networkx.strongly_connected_components(self._graph))
