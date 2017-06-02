@@ -70,7 +70,7 @@ class Semigroup(libsemigroups.SemigroupNC):
         G = CayleyGraph()
         G._adjacencies_list = super().right_cayley_graph()
         for i, adjacencies in enumerate(adjacencies_list):
-            G.add_node(i)
+            G._add_node(i)
 
         for i, adjacencies in enumerate(adjacencies_list):
             for j, adj in enumerate(adjacencies):
