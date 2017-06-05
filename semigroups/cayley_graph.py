@@ -131,6 +131,6 @@ class CayleyGraph:
             ... Transformation([1, 0]))
             >>> G = S.right_cayley_graph()
             >>> G.strongly_connected_components()
-            [{0, 2}, {1, 3}]
+            [set([0, 2]), set([1, 3])]
         """
         return list(networkx.strongly_connected_components(self._graph))
