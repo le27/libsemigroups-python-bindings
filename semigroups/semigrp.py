@@ -128,7 +128,7 @@ class Semigroup(libsemigroups.SemigroupNC):
             >>> G.ordered_adjacencies()
             [[0, 0], [2, 3], [2, 2], [0, 1]]
             >>> G.strongly_connected_components()
-            [{0}, {2}, {1, 3}]
+            [set([0]), set([2]), set([1, 3])]
         """
         G = CayleyGraph()
         G._adjacencies_list = libsemigroups.SemigroupNC.left_cayley_graph(self)
