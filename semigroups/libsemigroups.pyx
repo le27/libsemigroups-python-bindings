@@ -674,7 +674,18 @@ cdef class SemigroupNC:
                 x = c_graph.get(i, j)
                 adjacencies_list[-1].append(x)
 
-        return adjacencies_list    
+        return adjacencies_list
+
+    def left_cayley_graph(self):
+        cdef libsemigroups.RecVec[size_t]* c_graph = self._handle.left_cayley_graph()
+        adjacencies_list = []
+        for i in range(c_graph[0].nr_rows()):
+            adjacencies_list.append([])
+            for j in range(c_graph[0].nr_cols()):
+                x = c_graph.get(i, j)
+                adjacencies_list[-1].append(x)
+
+        return adjacencies_list  
 
 # FIXME should be a subclass of SemigroupNC
 cdef class FpSemigroupNC:
