@@ -37,12 +37,7 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
         # Check the alphabet
         if not isinstance(alphabet, str):
             raise TypeError('the first argument (alphabet) must be a string')
-<<<<<<< 569fbe98f1881f61551117f9ccc1924b44908dad
         elif not all(alphabet.count(i) == 1 for i in alphabet):
-=======
-        elif not all(alphabet.count(x) == 1
-                     for x in alphabet):
->>>>>>> semifp: alphabet input change
             raise ValueError('the first argument (alphabet) must be a '
                              'duplicate-free string')
 
@@ -200,7 +195,6 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
             bool: ``True`` if equivalent, ``False`` otherwise.
 
         Examples:
-<<<<<<< 569fbe98f1881f61551117f9ccc1924b44908dad
             >>> S = FpSemigroup('ab',[['a', 'aa'], ['b', 'bbb'], ['ab', 'ba']])
             >>> S.equal('b', 'b')
             True
@@ -226,13 +220,6 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
             >>> S = FpSemigroup('ab',
             ...                 [['aa', 'a'],['bbb', 'ab'], ['ab', 'ba']])
             >>> S.is_obviously_infinite()
-=======
-            >>> S = FpSemigroup('ab',
-            ...                 [['aa', 'a'],['bbb', 'ab'], ['ab','ba']])
-            >>> S.is_finite()
-            True
-            >>> FpSemigroup('ab', []).is_finite()
->>>>>>> semifp: alphabet input change
             False
             >>> FpSemigroup('ab', []).is_obviously_infinite()
             True
@@ -249,16 +236,11 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
                     if letter in word:
                         stop = True
                         break
-<<<<<<< 569fbe98f1881f61551117f9ccc1924b44908dad
                 if stop:
                     break
             if not stop:
                 return True
         return False
-=======
-            if not stop:
-                return False
->>>>>>> semifp: alphabet input change
 
     def enumerate(self, limit):
         if not self.is_finite():

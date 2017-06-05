@@ -22,7 +22,7 @@ lint:
 	flake8 semigroups/*.py 
 	flake8  tests/test_*.py
 
-doc: 
+doc:
 	cd docs ; make html; cd ..
 	@echo "See: docs/_build/html/index.html" 
 
