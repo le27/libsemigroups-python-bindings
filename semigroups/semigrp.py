@@ -7,6 +7,7 @@ import libsemigroups
 from semigroups.elements import Transformation
 from semigroups.cayley_graph import CayleyGraph
 from libsemigroups import ElementABC, PythonElementNC
+import networkx
 
 class Semigroup(libsemigroups.SemigroupNC):
     r'''
@@ -139,6 +140,98 @@ class Semigroup(libsemigroups.SemigroupNC):
             for j, adj in enumerate(adjacencies):
                 G._add_edge_with_label(j, (i, adj))
         return G
+
+def membership(f, A):
+    #Step 0
+    for generator in A:
+        if f * generator != generator * f:
+            return False
+
+    #Step 1
+    X = list(range(A[0].degree()))
+    barX = bar(X, A)
+    listY = [set([t]) for t in X]
+    Y = set.union(*listY)
+    barA = [bar_transformation(generator, barX) for generator in A]
+    barf = bar_transformation(f, barX)
+    barY = [barx for barx in barX if Y.intersection(set(barx)) != set([])]
+    Z = [barf[barx] for barx in barY]
+    barX_wo_redundencies = list(set(barX))
+    barX_wo_redundencies.sort()
+    IZ_set = set.intersection(*[stabiliser(barx, A, barA, X) for barx in Z])
+    IZ = [Transformation(list(img_tup)) for img_tup in IZ_set]
+    hatA = [hat(f, barX, Z, X) for f in IZ]
+
+    #Step 2
+    barS = Semigroup(barA_indexed(barA, barX))
+    barf_indexed = Transformation(index_dict_function(barf, barX_wo_redundencies, len(barX_wo_redundencies)))
+    if not barf_indexed in barS:
+        return False
+    g_a_gens = barS.factorisation(barf_indexed)
+    g_a = Transformation(X)
+    for i in g_a_gens:
+        g_a *= A[i]
+
+    #Step 3
+    g_a_img_list = list(g_a)
+    f_img_list = list(f)
+    hat_gc_dict = {}
+    for i in Y:
+        hat_gc_dict[g_a_img_list[i]] = f_img_list[i]
+    for i in set(X)-set(hat_gc_dict.keys()):
+        hat_gc_dict[i] = i
+    hat_gc = Transformation(index_dict_function(hat_gc_dict, X, len(X)))
+
+    #Step 4
+    print(hat_gc)
+    return hat_gc in Semigroup(hatA + [Transformation(X)])
+
+def bar(X, A):
+    G = networkx.MultiDiGraph()
+    for x in X:
+        G.add_node(x)
+    for generator in A:
+        for index, image in enumerate(generator):
+            G.add_edge(index, image)
+    return sorted([tuple(sorted(list(x))) for x in networkx.strongly_connected_components(G)])
+
+def bar_transformation(f, barX):
+    #gives transformation as dictionary, with keys as input, values as image
+    d = {}
+    for barx in barX:
+        image = image_transformation(f, barx[0])
+        for barx2 in barX:
+            if image in barx2:
+                d[barx] = barx2
+                break
+    return d
+
+def index_dict_function(g_dict, domain, n):
+    return [domain.index(g_dict[domain[i]]) for i in range(n)]
+
+def barA_indexed(barA, barX_wo_redundencies):
+    n = len(barX_wo_redundencies)
+    return [Transformation(index_dict_function(a, barX_wo_redundencies, n)) for a in barA]
+
+def image_transformation(f, x):
+    for i, image in enumerate(f):
+        if i == x:
+            return image
+
+def stabiliser(barx, A, barA, X):
+    return set([tuple(a) for a, bara in zip(A, barA) if bara[barx] == barx]).union(set([tuple(X)]))
+
+def hat(f, barX, Z, X):
+    #Gives transformation as image list
+    d = {}
+    for barx in barX:
+        if barx in Z:
+            for x in barx:
+                d[x] = image_transformation(f, x)
+        else:
+            for x in barx:
+                d[x] = x
+    return Transformation([d[i] for i in X])
 
 def FullTransformationMonoid(n):
     r'''
