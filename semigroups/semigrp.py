@@ -308,3 +308,19 @@ def FullTransformationMonoid(n):
     return Semigroup([Transformation([1, 0] + list(range(2, n))),
                       Transformation([0, 0] + list(range(2, n))),
                       Transformation([n - 1] + list(range(n - 1)))])
+
+def TransDirectProduct(*args):
+    assert all(isinstance(semigrp, Semigroup) for semigrp in args)
+    assert all(all(isinstance(elt, Transformation) for elt in semigrp) for semigrp in args)
+    length = sum(i[0].degree() for i in args)
+    identity = list(range(length))
+    out = [Transformation(identity)]
+    usedcount = 0
+    for semigroup in args:
+        deg = semigroup[0].degree()
+        for trans in semigroup.gens:
+            new_img_list = identity[:]
+            new_img_list[usedcount: usedcount + deg] = [usedcount + i for i in list(trans)]
+            out.append(Transformation(new_img_list))
+        usedcount += deg
+    return Semigroup(out)
