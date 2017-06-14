@@ -182,7 +182,7 @@ def membership(f, A):
     #An abelian group when restricted to the elements whose SCCs lie in Z.
     IZ_set = set.intersection(*[stabiliser(barx, A, barA, X) for barx in Z])
     IZ = [Transformation(list(img_tup)) for img_tup in IZ_set]
-    hatA = [hat(f, barX, Z, X) for f in IZ]
+    hatA = [hat(g, barX, Z, X) for g in IZ]
 
     #Step 2
     barS = Semigroup(barA_indexed(barA, barX))
@@ -200,12 +200,12 @@ def membership(f, A):
     hat_gc_dict = {}
     for i in Y:
         hat_gc_dict[g_a_img_list[i]] = f_img_list[i]
-    for i in set(X)-set(hat_gc_dict.keys()):
+    for i in set(X) - set(hat_gc_dict.keys()):
         hat_gc_dict[i] = i
     hat_gc = Transformation(index_dict_function(hat_gc_dict, X, len(X)))
 
     #Step 4
-    test_idempotent_memb(hat_gc, hatA + [Transformation(X)])
+    return hat_gc in Semigroup(hatA + [Transformation(X)])
 
 def bar(X, A):
     G = networkx.MultiDiGraph()
@@ -260,10 +260,10 @@ def hat(f, barX, Z, X):
                 d[x] = x
     return Transformation([d[i] for i in X])
 
-def test_idempotent_memb(f, A):
+def test_semilattice_memb(f, A):
     B = [a for a in A if a * f == f]
     g = f.identity()
-    for a in A:
+    for a in B:
         g *= a
     return f == g
 
