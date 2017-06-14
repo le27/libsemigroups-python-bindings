@@ -142,22 +142,44 @@ class Semigroup(libsemigroups.SemigroupNC):
         return G
 
 def membership(f, A):
+    #Ensure f has same degree as elts of A
+    n = A[0].degree()
+    for a in A:
+        if a.degree() != n:
+            raise ValueError('Degree of elements of A must be the same')
+
+    if f.degree() != n:
+        return False
+
     #Step 0
     for generator in A:
         if f * generator != generator * f:
             return False
 
     #Step 1
-    X = list(range(A[0].degree()))
+    X = list(range(n))
+
+    #The SCCs of X.
     barX = bar(X, A)
+
+    #Y is the union of the source SCCs of X
     listY = [set([t]) for t in X]
     Y = set.union(*listY)
+
     barA = [bar_transformation(generator, barX) for generator in A]
     barf = bar_transformation(f, barX)
+
+    #The SCCs that elements of y lie in. Here, barx is used to represent the
+    # SCC that x is in.
     barY = [barx for barx in barX if Y.intersection(set(barx)) != set([])]
+
+    #The image of Y under barf.
     Z = [barf[barx] for barx in barY]
+
     barX_wo_redundencies = list(set(barX))
     barX_wo_redundencies.sort()
+
+    #An abelian group when restricted to the elements whose SCCs lie in Z.
     IZ_set = set.intersection(*[stabiliser(barx, A, barA, X) for barx in Z])
     IZ = [Transformation(list(img_tup)) for img_tup in IZ_set]
     hatA = [hat(f, barX, Z, X) for f in IZ]
@@ -183,8 +205,7 @@ def membership(f, A):
     hat_gc = Transformation(index_dict_function(hat_gc_dict, X, len(X)))
 
     #Step 4
-    print(hat_gc)
-    return hat_gc in Semigroup(hatA + [Transformation(X)])
+    test_idempotent_memb(hat_gc, hatA + [Transformation(X)])
 
 def bar(X, A):
     G = networkx.MultiDiGraph()
@@ -195,7 +216,13 @@ def bar(X, A):
             G.add_edge(index, image)
     return sorted([tuple(sorted(list(x))) for x in networkx.strongly_connected_components(G)])
 
+
+    #given g in a semigroup S, with a set of SCCs barX, where x in X is in
+    #SCC barx, we define barg to be the transformation of barX, such that
+    #bar(xg) = (barx)barg
+
 def bar_transformation(f, barX):
+
     #gives transformation as dictionary, with keys as input, values as image
     d = {}
     for barx in barX:
@@ -232,6 +259,13 @@ def hat(f, barX, Z, X):
             for x in barx:
                 d[x] = x
     return Transformation([d[i] for i in X])
+
+def test_idempotent_memb(f, A):
+    B = [a for a in A if a * f == f]
+    g = f.identity()
+    for a in A:
+        g *= a
+    return f == g
 
 def FullTransformationMonoid(n):
     r'''
