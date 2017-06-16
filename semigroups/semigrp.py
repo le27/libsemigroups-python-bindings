@@ -61,9 +61,10 @@ class Semigroup(libsemigroups.SemigroupNC):
             except:
                 raise TypeError(err_msg)
 
-        gens = [g if isinstance(g, ElementABC) else PythonElementNC(g)
+        self.gens = [g if isinstance(g, ElementABC) else PythonElementNC(g)
                 for g in args]
-        libsemigroups.SemigroupNC.__init__(self, gens)
+        libsemigroups.SemigroupNC.__init__(self, self.gens)
+        self._done_commute_in = False
 
     def right_cayley_graph(self):
         r"""
@@ -141,75 +142,135 @@ class Semigroup(libsemigroups.SemigroupNC):
                 G._add_edge_with_label(j, (i, adj))
         return G
 
-def membership(f, A):
-    #Ensure f has same degree as elts of A
-    n = A[0].degree()
-    for a in A:
-        if a.degree() != n:
-            raise ValueError('Degree of elements of A must be the same')
+    def commutative_semilattice_memb(self, f):
+        if self.is_done():
+            return f in self
 
-    if f.degree() != n:
-        return False
+        #Ensure f has same degree as elts of the generating set
+        n = self.gens[0].degree()
+        if f.degree() != n:
+            return False
+        for generator in self.gens:
+            if not TCom(f, generator):
+                return False
 
-    #Step 0
-    for generator in A:
-        if f * generator != generator * f:
+        B = [a for a in self.gens if a * f == f]
+        g = f.identity()
+        for a in B:
+            g *= a
+        return f == g
+
+    def commutative_membership(self, f):
+        r"""
+        A semigroup :math:`S` is *commutative* if :math:`\forall a,b\in S\quad
+        ab = ba`. This function implements a polynomial time complexity
+        algorithm to test if a given transformation is in a commutative
+        transformation semigroup.
+
+        Args:
+            semigroups.elements.Transformation: A transformation to test.
+
+        Raises:
+            awaeds
+
+        Returns:
+            bool: Whether or not the semigroup is commutative.
+
+        Examples:
+            >>> from semigroups import Semigroup
+            >>> S = Semigroup(complex(0, 1))
+            >>> G = S.right_cayley_graph()
+            >>> G.ordered_adjacencies()
+            [[1], [2], [3], [0]]
+            >>> G.edges()
+            [(0, 1), (1, 2), (2, 3), (3, 0)]
+            >>> G.nodes()
+            [0, 1, 2, 3]
+        """
+        if self.is_done():
+            return f in self
+
+     #Ensure f has same degree as elts of self.gens, the generating set
+        n = self.gens[0].degree()
+
+        if f.degree() != n:
             return False
 
-    #Step 1
-    X = list(range(n))
+        #Step 0
+        for generator in self.gens:
+            if not TCom(f, generator):
+                return False
 
-    #The SCCs of X.
-    barX = bar(X, A)
+        if not self._done_commute_in:
+            #Step 1
+            self._states = list(range(n))
 
-    #Y is the union of the source SCCs of X
-    listY = [set([t]) for t in X]
-    Y = set.union(*listY)
+            #The SCCs of states.
+            self._SCCs = bar(self._states, self.gens)
+            self._no_SCCs = len(self._SCCs)
 
-    barA = [bar_transformation(generator, barX) for generator in A]
-    barf = bar_transformation(f, barX)
+            #sources is the union of the source SCCs of states
+            self._sources = set(self._states) - set([hit(a, x) for x in self._states for a in self.gens])
 
-    #The SCCs that elements of y lie in. Here, barx is used to represent the
-    # SCC that x is in.
-    barY = [barx for barx in barX if Y.intersection(set(barx)) != set([])]
+            #The SCCs that elements of sources lie in. Here, SCC is used to represent the
+            # SCC that x is in.
+            self._sourceSCCs = [SCC for SCC in self._SCCs if self._sources.intersection(set(SCC)) != set()]
 
-    #The image of Y under barf.
-    Z = [barf[barx] for barx in barY]
+            self._SCCs_wo_redundencies = sorted(list(set(self._SCCs)))
 
-    barX_wo_redundencies = list(set(barX))
-    barX_wo_redundencies.sort()
+            self._bargens = [bar_dict(generator, self._SCCs) for generator in self.gens]
+            no_SCCs = len(self._SCCs_wo_redundencies)
+            self._bargen_Transformations = [Transformation(index_dict_function(a, self._SCCs_wo_redundencies, no_SCCs)) for a in self._bargens]
 
-    #An abelian group when restricted to the elements whose SCCs lie in Z.
-    IZ_set = set.intersection(*[stabiliser(barx, A, barA, X) for barx in Z])
-    IZ = [Transformation(list(img_tup)) for img_tup in IZ_set]
-    hatA = [hat(g, barX, Z, X) for g in IZ]
 
-    #Step 2
-    barS = Semigroup(barA_indexed(barA, barX))
-    barf_indexed = Transformation(index_dict_function(barf, barX_wo_redundencies, len(barX_wo_redundencies)))
-    if not barf_indexed in barS:
+            self._done_commute_in = True
+
+        barf = bar_dict(f, self._SCCs)
+        barf_indexed = Transformation(index_dict_function(barf, self._SCCs, self._no_SCCs))
+
+        #The image of sources under barf.
+        Z = [barf[SCC] for SCC in self._sourceSCCs]
+
+        #An abelian group when restricted to the elements whose SCCs lie in Z.
+        IZ_set = set.intersection(*[stabiliser(SCC, self.gens, self._bargens, self._states) for SCC in Z] + [set([tuple(self._states)])])
+        IZ = [Transformation(list(img_tup)) for img_tup in IZ_set]
+        hatA = [hat(g, self._SCCs, Z, self._states) for g in IZ]
+
+        #Step 2
+        barf_indexed = Transformation(index_dict_function(barf, self._SCCs_wo_redundencies, len(self._SCCs_wo_redundencies)))
+        mem_powers_of_f = aperiodic_commutative_membership_test(barf_indexed, self._bargen_Transformations)
+        if not mem_powers_of_f[0]:
+            return False
+        g_a = Transformation(self._states)
+        for a in self.gens:
+            if tuple(index_dict_function(bar_dict(a, self._SCCs), self._SCCs, self._no_SCCs)) in mem_powers_of_f[1]:
+                g_a *= Transformation(list(a)) ** mem_powers_of_f[1][tuple(index_dict_function(bar_dict(a, self._SCCs), self._SCCs, self._no_SCCs))]
+
+        #Step 3
+        g_a_img_list = list(g_a)
+        f_img_list = list(f)
+        hat_gc_dict = {}
+        for i in self._sources:
+            hat_gc_dict[g_a_img_list[i]] = f_img_list[i]
+        for i in set(self._states) - set(hat_gc_dict.keys()):
+            hat_gc_dict[i] = i
+        hat_gc = Transformation(index_dict_function(hat_gc_dict, self._states, len(self._states)))
+
+        #Step 4
+        return hat_gc in Semigroup(hatA + [Transformation(self._states)])
+
+def TCom(a, b):
+    n = a.degree()
+    if b.degree() != n:
         return False
-    g_a_gens = barS.factorisation(barf_indexed)
-    g_a = Transformation(X)
-    for i in g_a_gens:
-        g_a *= A[i]
+    for x in range(n):
+        if hit(a, hit(b, x)) != hit(b, hit(a, x)):
+            return False
+    return True
 
-    #Step 3
-    g_a_img_list = list(g_a)
-    f_img_list = list(f)
-    hat_gc_dict = {}
-    for i in Y:
-        hat_gc_dict[g_a_img_list[i]] = f_img_list[i]
-    for i in set(X) - set(hat_gc_dict.keys()):
-        hat_gc_dict[i] = i
-    hat_gc = Transformation(index_dict_function(hat_gc_dict, X, len(X)))
-
-    #Step 4
-    return hat_gc in Semigroup(hatA + [Transformation(X)])
-
-def bar(X, A):
+def bar(states, A):
     G = networkx.MultiDiGraph()
-    for x in X:
+    for x in states:
         G.add_node(x)
     for generator in A:
         for index, image in enumerate(generator):
@@ -217,55 +278,81 @@ def bar(X, A):
     return sorted([tuple(sorted(list(x))) for x in networkx.strongly_connected_components(G)])
 
 
-    #given g in a semigroup S, with a set of SCCs barX, where x in X is in
-    #SCC barx, we define barg to be the transformation of barX, such that
-    #bar(xg) = (barx)barg
+    #given g in a semigroup S, with a set of SCCs, where x in states is in
+    #SCC SCC, we define barg to be the transformation of SCCs, such that
+    #bar(xg) = (SCC)barg
 
-def bar_transformation(f, barX):
-
+def bar_dict(f, SCCs):
     #gives transformation as dictionary, with keys as input, values as image
     d = {}
-    for barx in barX:
-        image = image_transformation(f, barx[0])
-        for barx2 in barX:
-            if image in barx2:
-                d[barx] = barx2
+    for SCC in SCCs:
+        image = hit(f, SCC[0])
+        for SCC2 in SCCs:
+            if image in SCC2:
+                d[SCC] = SCC2
                 break
     return d
+
+def aperiodic_commutative_membership_test(f, A):
+    #luke conjectures this works but not yet verified
+    thresholds = {}
+    for a in A:
+        old_test = a.identity()
+        test = a
+        i = 0
+        while old_test != test:
+            i += 1
+            old_test = test
+            test *= a
+        thresholds[tuple(a)] = i
+
+    B = [A[0]]
+    for a in A[1:]:
+        if not aperiodic_commutative_membership_test_ir_gen(a, B, thresholds)[0]:
+            B.append(a)
+    
+    return aperiodic_commutative_membership_test_ir_gen(f, B, thresholds)
+
+
+def aperiodic_commutative_membership_test_ir_gen(f, A, thresholds):
+    powers = {}
+    for a in A:
+        j = 0
+        a_power_by_f = a * f
+        a_power_by_f_old = f
+        while a_power_by_f_old != a_power_by_f:
+            j += 1
+            a_power_by_f_old = a_power_by_f
+            a_power_by_f *= a
+        powers[tuple(a)] = thresholds[tuple(a)] - j
+
+    test_f = f.identity()
+    for a in A:
+        test_f *= a ** powers[tuple(a)]
+    return test_f == f, powers
 
 def index_dict_function(g_dict, domain, n):
     return [domain.index(g_dict[domain[i]]) for i in range(n)]
 
-def barA_indexed(barA, barX_wo_redundencies):
-    n = len(barX_wo_redundencies)
-    return [Transformation(index_dict_function(a, barX_wo_redundencies, n)) for a in barA]
-
-def image_transformation(f, x):
+def hit(f, x):
     for i, image in enumerate(f):
         if i == x:
             return image
 
-def stabiliser(barx, A, barA, X):
-    return set([tuple(a) for a, bara in zip(A, barA) if bara[barx] == barx]).union(set([tuple(X)]))
+def stabiliser(SCC, A, bargens, states):
+    return set([tuple(a) for a, barg in zip(A, bargens) if barg[SCC] == SCC]).union(set([tuple(states)]))
 
-def hat(f, barX, Z, X):
+def hat(f, SCCs, Z, states):
     #Gives transformation as image list
     d = {}
-    for barx in barX:
-        if barx in Z:
-            for x in barx:
-                d[x] = image_transformation(f, x)
+    for SCC in SCCs:
+        if SCC in Z:
+            for x in SCC:
+                d[x] = hit(f, x)
         else:
-            for x in barx:
+            for x in SCC:
                 d[x] = x
-    return Transformation([d[i] for i in X])
-
-def test_semilattice_memb(f, A):
-    B = [a for a in A if a * f == f]
-    g = f.identity()
-    for a in B:
-        g *= a
-    return f == g
+    return Transformation([d[i] for i in states])
 
 def FullTransformationMonoid(n):
     r'''
