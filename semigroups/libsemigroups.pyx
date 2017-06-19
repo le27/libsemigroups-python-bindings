@@ -33,7 +33,7 @@ from cysignals.signals cimport sig_on, sig_off
 
 cdef class ElementABC:
     """
-    An abstract base class for handles to libsemigroups elements.
+    This abstract class provides common methods for its subclasses.
 
     Any subclass shall implement an ''__init__'' method which
     initializes _handle.
@@ -172,7 +172,7 @@ cdef class PartialPermNC(ElementABC):
         Method for finding the rank of the partial permutation.
 
         Returns:
-            int: The rank of the partial permutation
+            int: The rank of the partial permutation.
 
         Raises:
             TypeError:  If any argument is given.
