@@ -61,8 +61,9 @@ class Semigroup(libsemigroups.SemigroupNC):
             except:
                 raise TypeError(err_msg)
 
-        self.gens = [g if isinstance(g, ElementABC) else PythonElementNC(g)
-                for g in args]
+        self.gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
+                      "<class 'semigroups.semifp.FPSOME'>")
+                else PythonElementNC(g) for g in args]
         libsemigroups.SemigroupNC.__init__(self, self.gens)
         self._done_commute_in = False
 
@@ -268,6 +269,13 @@ def TCom(a, b):
             return False
     return True
 
+def semi_to_trans_semi(S):
+    X = list(S)
+    G=[]
+    for e in S.gens:
+        G.append(Transformation([X.index(x * e) for x in X]))
+    return Semigroup(G)
+
 def bar(states, A):
     G = networkx.MultiDiGraph()
     for x in states:
@@ -293,8 +301,91 @@ def bar_dict(f, SCCs):
                 break
     return d
 
-def aperiodic_commutative_membership_test(f, A):
-    #luke conjectures this works but not yet verified
+
+#def abelian_transformation_group_membership(f, A):
+#    for a in A: 
+#        if not TCom(f, a):
+#            return False
+#    states = list(range(A[0].degree()))
+#    G = networkx.MultiGraph()
+#    for x in states:
+#        G.add_node(x)
+#    for generator in A:
+#        for index, image in enumerate(generator):
+#            G.add_edge(index, image)
+#    orbits = sorted([tuple(sorted(list(x))) for x in networkx.connected_components(G)])
+#
+#    orbit_restrictions = {tuple(f): restrict_trans(f, orbits)}
+#    for a in A:
+#        orbit_restrictions[tuple(a)] = restrict_trans(a, orbits)
+#    
+#    restricted_gens = []
+#    for i, j in enumerate(orbits):
+#        restricted_gens.append(gens_trans_abelian_elt(orbit_restrictions[tuple(f)][i],
+#                                                      [orbit_restrictions[tuple(a)][i] for a in A]))
+#    b = [[restricted_gens[i].count(orbit_restrictions[tuple(a)][i]) for a in A] for i,j in enumerate(restricted_gens)]
+#    t = {}
+#    for i in range(len(A)):
+#        for a in A:
+#            t{(i,i)} = min(k s.t. g[i]**k in <gk+1 ... gr>)
+#            k = 1
+#            while orbit_restrictions[tuple(a)][i]
+#    return b
+
+#def gens_trans_abelian_elt(f, gens):
+#    tree = [cyclic_group_list(g) for g in gens]
+#    deg = gens[0].degree()
+#    n = x = len(tree)
+#    while x > 0:
+#        x -= 1
+#        current_group1 = tree[x]
+#        current_group2 = []
+#        if 2 * x + 1 < n:
+#            for i in tree[2 * x + 1]:
+#                for j in current_group1:
+#                    current_group2.append([i[0] * j[0], i[1] + j[1]])
+#            current_group1 = condense_list_by_1st_coordinate(current_group2)
+#            current_group2 = []
+#        if 2 * x < n:
+#            for i in tree[2 * x]:
+#                for j in current_group1:
+#                    current_group2.append([i[0] * j[0], i[1] + j[1]])
+#            current_group1 = condense_list_by_1st_coordinate(current_group2)
+#            current_group2 = []
+#        tree[x] = current_group1
+#    for x in tree[0]:
+#        if f == x[0]:
+#            return x[1]
+#    return False
+
+#def condense_list_by_1st_coordinate(L):
+#    found = []
+#    out = []
+#    for x in L:
+#        if not x[0] in found:
+#            out.append(x)
+#            found.append(x[0])
+#    return out
+
+#def cyclic_group_list(g):
+#    group = [[g.identity(), []]]
+#    current = g
+#    i = 1
+#    while current != g.identity():
+#        group.append([current,[g]*i])
+#        i += 1
+#        current *= g
+#    return group
+
+
+#def restrict_trans(T, S):
+#    out = {}
+#    for i,j in enumerate(S):
+#        out[i] = Transformation(list(map(lambda x: S[i].index(x),[hit(T,x) for x in j])))
+#    return out
+
+def aperiodic_UF_commutative_membership_test(f, A):
+    #luke conjectures this works but it doesn't
     thresholds = {}
     for a in A:
         old_test = a.identity()
@@ -305,14 +396,32 @@ def aperiodic_commutative_membership_test(f, A):
             old_test = test
             test *= a
         thresholds[tuple(a)] = i
+    maxthreshold = max(thresholds.values())
 
+    i=0
+    old_test = f.identity()
+    test = f
+    i = 0
+    while old_test != test and i <= maxthreshold:
+        i += 1
+        old_test = test
+        test *= f
+    thresholds[tuple(f)] = i
+    zero = A[0].identity()
+    for a in A:
+        zero *= a ** thresholds[tuple(a)]
     B = [A[0]]
     for a in A[1:]:
         if not aperiodic_commutative_membership_test_ir_gen(a, B, thresholds)[0]:
             B.append(a)
-    
+
     return aperiodic_commutative_membership_test_ir_gen(f, B, thresholds)
 
+def prod(L):
+    out = L[0]
+    for l in L[1:]:
+        out *= l
+    return out
 
 def aperiodic_commutative_membership_test_ir_gen(f, A, thresholds):
     powers = {}
