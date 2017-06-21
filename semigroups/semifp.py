@@ -57,13 +57,8 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
 
         self._pure_letter_alphabet = True
         for i in alphabet:
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             if not i in ('abcdefghijklmnopqrstuvwxyz1' +
                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
-=======
-            if not i in ("abcdefghijklmnopqrstuvwxyz1" +
-                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
->>>>>>> semifp: Semigroup parent class compatability
                 self._pure_letter_alphabet = False
                 break
 
@@ -80,11 +75,7 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
 
         libsemigroups.FpSemigroupNC.__init__(self, len(alphabet), rels)
         if not self.is_obviously_infinite():
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             Semigroup.__init__(self, *[_FPSOME(self, i) for i in self.alphabet])
-=======
-            Semigroup.__init__(self, *[FPSOME(self, i) for i in self.alphabet])
->>>>>>> semifp: Semigroup parent class compatability
 
     def _parse_word(self, word):
         '''
@@ -122,28 +113,17 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
             list: factorisation into generators.
 
         Examples:
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             >>> S = FpSemigroup('ab',[['a', 'aa'], ['b', 'bbb'], ['ab', 'ba']])
             >>> S.factorisation('b')
             [1]
             >>> S.factorisation('aaabb')
-=======
-            >>> S = FpSemigroup("ab",[["a", "aa"], ["b", "bbb"], ["ab", "ba"]])
-            >>> S.factorisation("b")
-            [1]
-            >>> S.factorisation("aaabb")
->>>>>>> semifp: Semigroup parent class compatability
             [0, 1, 1]
         '''
         if self.is_obviously_infinite():
             raise ValueError('given semigroup is infinite')
         word = self._parse_word(word)
         self.check_word(word)
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         Pyword = libsemigroups.PythonElementNC(_FPSOME(self, word))
-=======
-        Pyword = libsemigroups.PythonElementNC(FPSOME(self, word))
->>>>>>> semifp: Semigroup parent class compatability
         return Semigroup.factorisation(self, Pyword)
 
     def normal_form(self, word):
@@ -159,7 +139,6 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
             string: normal for m of the given word.
 
         Examples:
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             >>> S = FpSemigroup('ab',[['a', 'aa'], ['b', 'bbb'], ['ab', 'ba']])
             >>> S.normal_form('b')
             'b'
@@ -170,18 +149,6 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
         '''
         Factors = self.factorisation(word)
         return ''.join(self.alphabet[i] for i in Factors)
-=======
-            >>> S = FpSemigroup("ab",[["a", "aa"], ["b", "bbb"], ["ab", "ba"]])
-            >>> S.normal_form("b")
-            'b'
-            >>> S.normal_form("aaabb")
-            'abb'
-            >>> S.normal_form("(a^1000)bb")
-            'abb'
-        '''
-        Factors = self.factorisation(word)
-        return "".join(self.alphabet[i] for i in Factors)
->>>>>>> semifp: Semigroup parent class compatability
 
     def size(self):
         '''
@@ -207,15 +174,9 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
 
     def __contains__(self, word):
         if not isinstance(word, str):
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             raise ValueError('word should be a string')
         word = self._parse_word(word)
         if word == '':
-=======
-            raise ValueError("word should be a string")
-        word = self._parse_word(word)
-        if word == "":
->>>>>>> semifp: Semigroup parent class compatability
             return isinstance(self, FpMonoid)
         for letter in word:
             if letter not in self.alphabet:
@@ -234,7 +195,6 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
             bool: ``True`` if equivalent, ``False`` otherwise.
 
         Examples:
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             >>> S = FpSemigroup('ab',[['a', 'aa'], ['b', 'bbb'], ['ab', 'ba']])
             >>> S.equal('b', 'b')
             True
@@ -243,25 +203,11 @@ class FpSemigroup(libsemigroups.FpSemigroupNC, Semigroup):
             >>> S.equal('a', 'aa')
             True
             >>> S.equal('ab', 'ba^1000')
-=======
-            >>> S = FpSemigroup("ab",[["a", "aa"], ["b", "bbb"], ["ab", "ba"]])
-            >>> S.equal("b", "b")
-            True
-            >>> S.equal("b", "bb")
-            False
-            >>> S.equal("a", "aa")
-            True
-            >>> S.equal("ab", "ba^1000")
->>>>>>> semifp: Semigroup parent class compatability
             True
         '''
         if not self.is_finite():
             raise ValueError('given semigroup is infinite')
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         return _FPSOME(self, word1) == _FPSOME(self, word2)
-=======
-        return FPSOME(self, word1) == FPSOME(self, word2)
->>>>>>> semifp: Semigroup parent class compatability
 
     def is_obviously_infinite(self):
         '''Attempts to check if a finitely presented semigroup is obviously
@@ -409,7 +355,6 @@ class FpMonoid(FpSemigroup):
         return ('<fp monoid with %d generators and %d relations>'
                 % (nrgens, nrrels))
 
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
 class _FPSOME(libsemigroups.ElementABC):
     '''FpSemigroupElement Object
     Examples:
@@ -419,17 +364,6 @@ class _FPSOME(libsemigroups.ElementABC):
         >>> _FPSOME(FpS,'bab')
         'bab'
     '''
-=======
-class FPSOME(libsemigroups.ElementABC):
-    """FpSemigroupElement Object
-    Examples:
-        >>> FpS = FpSemigroup("ab",[["aa","a"],["bbb","ab"],["ab","ba"]])
-        >>> FPSOME(FpS,"a")
-        'a'
-        >>> FPSOME(FpS,"bab")
-        'bab'
-    """
->>>>>>> semifp: Semigroup parent class compatability
 
     def __init__(self, FpS, word):
         '''
@@ -446,7 +380,6 @@ class FPSOME(libsemigroups.ElementABC):
             ValueError: If the word contains a generator not n the alphabet
                         of the given semigroup.
         '''
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         if not isinstance(word, str):
             raise TypeError('given word must be a string')
         self.FpS = FpS
@@ -458,54 +391,24 @@ class FPSOME(libsemigroups.ElementABC):
                 self.Repword = '1'
             else:
                 self.word = ''
-=======
-        if not isinstance(FpS, FpSemigroup):
-            raise TypeError("given Semigroup is not a valid FpSemigroup")
-        if not isinstance(word, str):
-            raise TypeError("given word must be a string")
-        self.FpS = FpS
-        self._Repword = word
-
-        if word == "":
-            if isinstance(FpS, FpMonoid):
-                self.word = "1"
-                self._Repword = "1"
-            else:
-                self.word = ""
->>>>>>> semifp: Semigroup parent class compatability
         else:
             self.word = _remove_powers(_remove_brackets(word))
 
         self.FpS.check_word(self.word)
 
     def __eq__(self, other):
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         if not (isinstance(other, _FPSOME) and
                 self.FpS is other.FpS):
             return False
         return (self.word_to_class_index() ==
                 other.word_to_class_index())
 
-=======
-        if not (isinstance(other, FPSOME) and
-                self.FpS is other.FpS):
-            return False
-        elif self.word == "" or other.word == "":
-            return self.word == other.word
-        return (self.word_to_class_index() ==
-                other.word_to_class_index())
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
->>>>>>> semifp: Semigroup parent class compatability
     def word_to_class_index(self):
         return self.FpS.word_to_class_index(self.word)
 
     def __hash__(self):
         return self.word_to_class_index()
 
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
     def identity(self):
         return _FPSOME(self.FpS, '')
 
@@ -528,93 +431,37 @@ def _remove_brackets(word):
     #if the number of left brackets is different from the number of right
     #brackets they can't possibly pair up
     if not word.count('(') == word.count(')'):
-=======
-    @staticmethod
-    def degree():
-        return 0
-
-    def identity(self):
-        return FPSOME(self.FpS, "")
-
-    def __mul__(self, other):
-        if self.word == "" and other.word == "":
-            raise ValueError("no empty word in this semigroup")
-        if not (isinstance(other, FPSOME) and
-                self.FpS is other.FpS):
-            raise TypeError("given words are not members"+
-                            " of the same FpSemigroup")
-
-        return FPSOME(self.FpS, self.word + other.word)
-
-    def __repr__(self):
-        return "'" + self._Repword + "'"
-
-def _remove_brackets(word):
-    # pylint: disable = too-many-branches
-    if word == "":
-        return ""
-
-    #if the number of left brackets is different from the number of right
-    #brackets they can't possibly pair up
-    if not word.count("(") == word.count(")"):
->>>>>>> semifp: Semigroup parent class compatability
         raise ValueError('invalid bracket structue')
 
     #if the ^ is at the end of the string there is no exponent.
     #if the ^ is at the start of the string there is no base.
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
     if word[0] == '^' or word[-1] == '^':
-=======
-    if word[0] == "^" or word[-1] == "^":
->>>>>>> semifp: Semigroup parent class compatability
         raise ValueError('invalid power structure')
 
     #checks that all ^s have an exponent.
     for index, element in enumerate(word):
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         if element == '^':
-=======
-        if element == "^":
->>>>>>> semifp: Semigroup parent class compatability
             if not word[index + 1] in '0123456789':
                 raise ValueError('invalid power structure')
 
     #i acts as a pointer to positions in the string.
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
     newword = ''
     i = 0
     while i < len(word):
         #if there are no brackets the character is left as it is.
         if word[i] != '(':
-=======
-    newword = ""
-    i = 0
-    while i < len(word):
-        #if there are no brackets the character is left as it is.
-        if word[i] != "(":
->>>>>>> semifp: Semigroup parent class compatability
             newword += word[i]
         else:
             lbracket = i
             rbracket = -1
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             #tracks how 'deep' the position of i is in terms of nested
-=======
-            #tracks how "deep" the position of i is in terms of nested
->>>>>>> semifp: Semigroup parent class compatability
             #brackets
             nestcount = 0
             i += 1
             while i < len(word):
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
                 if word[i] == '(':
                     nestcount += 1
                 elif word[i] == ')':
-=======
-                if word[i] == "(":
-                    nestcount += 1
-                elif word[i] == ")":
->>>>>>> semifp: Semigroup parent class compatability
                     if nestcount == 0:
                         rbracket = i
                         break
@@ -637,11 +484,7 @@ def _remove_brackets(word):
             if rbracket + 1 == len(word):
                 newword += _remove_brackets(word[lbracket + 1:
                                                  rbracket])
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
             elif word[rbracket + 1] != '^':
-=======
-            elif word[rbracket + 1] != "^":
->>>>>>> semifp: Semigroup parent class compatability
                 newword += _remove_brackets(word[lbracket + 1:
                                                  rbracket])
             #if rbracket is followed by ^ then the value inside the
@@ -649,11 +492,7 @@ def _remove_brackets(word):
             else:
                 i += 2
                 while i < len(word):
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
                     if word[i] in '0123456789':
-=======
-                    if word[i] in "0123456789":
->>>>>>> semifp: Semigroup parent class compatability
                         i += 1
                     else:
                         break
@@ -666,17 +505,10 @@ def _remove_brackets(word):
     return newword
 
 def _remove_powers(word):
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
     if word == '':
         return ''
 
     newword = ''
-=======
-    if word == "":
-        return ""
-
-    newword = ""
->>>>>>> semifp: Semigroup parent class compatability
     i = 0
     while i < len(word):
         #if last character reached there is no space for exponentiation.
@@ -684,11 +516,7 @@ def _remove_powers(word):
             newword += word[i]
             i += 1
         #if the character is not being powered then it is left as it is.
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         elif word[i + 1] != '^':
-=======
-        elif word[i + 1] != "^":
->>>>>>> semifp: Semigroup parent class compatability
             newword += word[i]
             i += 1
         else:
@@ -696,11 +524,7 @@ def _remove_powers(word):
             i += 2
             if i < len(word):
                 #extracts the exponent from the string.
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
                 while word[i] in '0123456789':
-=======
-                while word[i] in "0123456789":
->>>>>>> semifp: Semigroup parent class compatability
                     i += 1
                     if i >= len(word):
                         break
