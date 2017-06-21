@@ -258,7 +258,7 @@ class Semigroup(libsemigroups.SemigroupNC):
         hat_gc = Transformation(index_dict_function(hat_gc_dict, self._states, len(self._states)))
 
         #Step 4
-        return hat_gc in Semigroup(hatA + [Transformation(self._states)])
+        return group_mem(hat_gc, hatA + [Transformation(self._states)])
 
 def TCom(a, b):
     n = a.degree()
@@ -301,6 +301,53 @@ def bar_dict(f, SCCs):
                 break
     return d
 
+def group_mem(f, A):
+    n = A[0].degree()
+    k_i = [hit(f, 0)]
+    X_i = [orbit(0, A)]
+    if not k_i[0] in X_i[0][1]:
+        return False, "Cows = Sheep"
+    f_i = [f]
+
+    state = 1
+    while f_i[-1] != f.identity():
+        X_i.append(orbit(state, A))
+        k_i.append(hit(f_i[-1], state))
+        f_i.append(f_i[-1] * invert_perm(prod(X_i[state][0][k_i[-1]], Transformation(list(range(n))))))
+
+        if not k_i[-1] in X_i[-1][1]:
+            return False, "Cows != Sheep", state, k_i, X_i
+
+        state += 1
+
+    return True
+
+
+def invert_perm(f): 
+    outputs = list(f)
+    return Transformation([outputs.index(i) for i in range(f.degree())])
+
+
+def orbit(l, A):
+    X_l = {l}
+    X_l_transformations = {l:()}
+    for a in A:
+        new1 = X_l
+        new2 = X_l
+        test = True
+        while test:
+            test = False
+            new1 = set(new2)
+            new2 = set()
+            for x in new1:
+                h = hit(a, x)
+                if (not h in X_l) and (not h in new2):
+                    X_l.add(h)
+                    new2.add(h)
+                    X_l_transformations[h] = X_l_transformations[x] + (a,)
+                    test = True
+            
+    return X_l_transformations, X_l
 
 #def abelian_transformation_group_membership(f, A):
 #    for a in A: 
@@ -417,9 +464,9 @@ def aperiodic_UF_commutative_membership_test(f, A):
 
     return aperiodic_commutative_membership_test_ir_gen(f, B, thresholds)
 
-def prod(L):
-    out = L[0]
-    for l in L[1:]:
+def prod(L, identity):
+    out = identity
+    for l in L:
         out *= l
     return out
 
