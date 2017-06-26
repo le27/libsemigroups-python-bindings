@@ -282,13 +282,13 @@ class Semigroup(libsemigroups.SemigroupNC):
             self._no_SCCs = len(self._SCCs)
 
             #sources is the union of the source SCCs of states
-            self._sources = (set(self._states) - 
+            self._sources = (set(self._states) -
                              set([hit(x, a) for x in self._states
                                             for a in self.gens]))
 
             #The SCCs that elements of sources lie in. Here, SCC is used to
             #represent the SCC that a state is in.
-            self._sourceSCCs = [SCC for SCC in self._SCCs if 
+            self._sourceSCCs = [SCC for SCC in self._SCCs if
                                 self._sources.intersection(set(SCC)) != set()]
 
             self._SCCs_wo_redundencies = sorted(list(set(self._SCCs)))
@@ -358,7 +358,7 @@ def semi_to_trans_semi(S):
         G.append(Transformation([X.index(x * e) for x in X]))
     return Semigroup(G)
 
-def invert_perm(f): 
+def invert_perm(f):
     outputs = list(f)
     return Transformation([outputs.index(i) for i in range(f.degree())])
 
@@ -389,11 +389,11 @@ def orbit(l, A):
                     new2.add(h)
                     X_l_transformations[h] = X_l_transformations[x] + (a,)
                     test = True
-            
+
     return X_l_transformations, X_l
 
 #def abelian_transformation_group_membership(f, A):
-#    for a in A: 
+#    for a in A:
 #        if not transformations_commute(f, a):
 #            return False
 #    states = list(range(A[0].degree()))
@@ -408,7 +408,7 @@ def orbit(l, A):
 #    orbit_restrictions = {tuple(f): restrict_trans(f, orbits)}
 #    for a in A:
 #        orbit_restrictions[tuple(a)] = restrict_trans(a, orbits)
-#    
+#
 #    restricted_gens = []
 #    for i, j in enumerate(orbits):
 #        restricted_gens.append(gens_trans_abelian_elt(orbit_restrictions[tuple(f)][i],
@@ -562,7 +562,7 @@ def prod(L, identity):
     return out
 
 def aperiod_james(f, A):
-    powers = {tuple(a): 0 for a in A}
+    powers = {}
     restriction = list(range(f.degree()))
     states = restriction[:]
     fd = {-1: -1}
@@ -577,60 +577,244 @@ def aperiod_james(f, A):
         for x in states:
             ad[x] = hit(x, a)
 
-        old_test = restrict_dict(identity_d, restriction, states)
-        test = restrict_dict(ad, restriction, states)
+        not_in_fact = False
+        for x in restriction:
+            for y in restriction:
+                if hit(x, a) == hit(y, a) and hit(x, f) != hit(y, f):
+                    not_in_fact = True
+                    break
+        if not_in_fact:
+            powers[tuple(a)] = 0
+            continue
+
+        print(a)
+        # old_test = restrict_dict(identity_d, restriction, states)
+        # test = restrict_dict(ad, restriction, states)
+        old_test = identity_d.copy()
+        test = ad.copy()
         i = 0
 
-        while old_test != test:
+        while restrict_dict(old_test, restriction, states) != restrict_dict(test, restriction, states):
             i += 1
-            old_test = test
+            old_test = test.copy()
             test = compose_dicts(test, ad)
 
         j = 0
-        a_power_by_f = compose_dicts(ad, fd)
-        a_power_by_f_old = fd
+        a_power_by_f = compose_dicts(fd, ad)
+        a_power_by_f_old = fd.copy()
 
-        print(a)
-        print(a_power_by_f_old)
-        print(a_power_by_f)
+        # print(a)
+        # print(a_power_by_f_old.values())
+        # print(a_power_by_f.values())
+
+        #while restrict_dict(a_power_by_f_old, restriction, states) != restrict_dict(a_power_by_f, restriction, states):
         while a_power_by_f_old != a_power_by_f:
             j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f = compose_dicts(ad, a_power_by_f)
-            print(a_power_by_f_old)
-            print(a_power_by_f)
+            a_power_by_f_old = a_power_by_f.copy()
+            a_power_by_f = compose_dicts(a_power_by_f, ad)
+            # print(a_power_by_f_old.values())
+            # print(a_power_by_f.values())
 
         a_power = pow_dict(ad, i - j, states)
-        print(i, j)
         powers[tuple(a)] = i - j
-        fd = compose_dicts(inverse_dict(a_power, states), fd)
+
+        print(i, j)
 
         restriction = list(set(a_power.values()).intersection(set(restriction)))
-        
-        if restrict_dict(fd, restriction, states) == restrict_dict(identity_d, restriction, states):
-            break
+        # print(restriction)
+        fd = restrict_dict(compose_dicts(inverse_dict(a_power, states), fd), restriction, states)
+#        print(fd)
+#        fd = compose_dicts(inverse_dict(a_power, states), fd)
 
+        # fd_defined_on = [key for key in fd.keys() if fd[key] != -1]
+        #
+        # if restrict_dict(identity_d, fd_defined_on, states) == restrict_dict(fd, fd_defined_on, states):
+        #     break
     test_f = f.identity()
     for a in A:
         test_f *= a ** powers[tuple(a)]
     return test_f == f, powers
 
+def aperiod3(f, A):
+    powers = {}
+    restriction = list(range(f.degree()))
+    states = restriction[:]
+    fd = {-1: -1}
+    identity_d = {-1: -1}
+
+    A2 = sorted([(a.degree(), a) for a in A])
+
+    for x in states:
+        fd[x] = hit(x, f)
+        identity_d[x] = x
+
+    for atup in A2:
+        a = atup[1]
+        ad = {-1: -1}
+        for x in states:
+            ad[x] = hit(x, a)
+
+        not_in_fact = False
+        for x in restriction:
+            for y in restriction:
+                if hit(x, a) == hit(y, a) and hit(x, f) != hit(y, f):
+                    not_in_fact = True
+                    break
+        if not_in_fact:
+            powers[tuple(a)] = 0
+            continue
+
+        print(a)
+        # old_test = restrict_dict(identity_d, restriction, states)
+        # test = restrict_dict(ad, restriction, states)
+        old_test = identity_d.copy()
+        test = ad.copy()
+        i = 0
+
+        while restrict_dict(old_test, restriction, states) != restrict_dict(test, restriction, states):
+            i += 1
+            old_test = test.copy()
+            test = compose_dicts(test, ad)
+
+        j = 0
+        a_power_by_f = compose_dicts(fd, ad)
+        a_power_by_f_old = fd.copy()
+
+        # print(a)
+        # print(a_power_by_f_old.values())
+        # print(a_power_by_f.values())
+
+        #while restrict_dict(a_power_by_f_old, restriction, states) != restrict_dict(a_power_by_f, restriction, states):
+        while a_power_by_f_old != a_power_by_f:
+            j += 1
+            a_power_by_f_old = a_power_by_f.copy()
+            a_power_by_f = compose_dicts(a_power_by_f, ad)
+            # print(a_power_by_f_old.values())
+            # print(a_power_by_f.values())
+
+        a_power = pow_dict(ad, i - j, states)
+        powers[tuple(a)] = i - j
+
+        print(i, j)
+
+        restriction = list(set(a_power.values()).intersection(set(restriction)))
+        # print(restriction)
+        fd = restrict_dict(compose_dicts(inverse_dict(a_power, states), fd), restriction, states)
+#        print(fd)
+#        fd = compose_dicts(inverse_dict(a_power, states), fd)
+
+        # fd_defined_on = [key for key in fd.keys() if fd[key] != -1]
+        #
+        # if restrict_dict(identity_d, fd_defined_on, states) == restrict_dict(fd, fd_defined_on, states):
+        #     break
+    test_f = f.identity()
+    for a in A:
+        test_f *= a ** powers[tuple(a)]
+    return test_f == f, powers
+
+def aperiod2(f, A):
+    powers = {tuple(a): 0 for a in A}
+    restriction = list(range(f.degree()))
+    states = restriction[:]
+    fd = {-1: -1}
+    identity_d = {-1: -1}
+
+    for x in states:
+        fd[x] = hit(x, f)
+        identity_d[x] = x
+
+    done = False
+    for a in A:
+        ad = {-1: -1}
+        for x in states:
+            ad[x] = hit(x, a)
+
+        not_in_fact = False
+        for x in restriction:
+            for y in restriction:
+                if hit(x, a) == hit(y, a) and hit(x, f) != hit(y, f):
+                    not_in_fact = True
+                    break
+        if not_in_fact:
+            print(a)
+            continue
+
+        print('y', a)
+        old_test = identity_d.copy()
+        test = ad.copy()
+        i = 0
+
+        while restrict_dict(old_test, restriction, states) != restrict_dict(test, restriction, states):
+            i += 1
+            old_test = test.copy()
+            test = compose_dicts(test, ad)
+        print(i)
+
+        j = 0
+        while compose_dicts(fd, ad) != fd and i > 0:
+            powers[tuple(a)] = i
+            test_f = f.identity()
+            for b in A:
+                test_f *= b ** powers[tuple(b)]
+            if test_f == f:
+                done = True
+                break
+            j += 1
+            i -= 1
+
+            restriction = list(set(a ** j).intersection(set(restriction)))
+            # print(restriction)
+            fd = restrict_dict(compose_dicts(inverse_dict(ad, states), fd), restriction, states)
+            print(i, j)
+
+
+        powers[tuple(a)] = i
+
+        if done:
+            break
+
+
+
+#        print(fd)
+#        fd = compose_dicts(inverse_dict(a_power, states), fd)
+
+        # fd_defined_on = [key for key in fd.keys() if fd[key] != -1]
+        #
+        # if restrict_dict(identity_d, fd_defined_on, states) == restrict_dict(fd, fd_defined_on, states):
+        #     break
+    test_f = f.identity()
+    for a in A:
+        test_f *= a ** powers[tuple(a)]
+    return test_f == f, powers
+
+
 def pow_dict(d, power, states):
     out = {state: state for state in states}
+    out[-1] = -1
     for i in range(power):
         out = compose_dicts(out, d)
     out[-1] = -1
     return out
 
 def inverse_dict(d, states):
-    out = {state: state for state in states}
-    out.update({v: k for k,v in d.items()})
+    out = {}
+
+    for key in states:
+        not_in_image = True
+        for k, v in d.items():
+            if key == v and k != -1:
+                out[key] = k
+                not_in_image = False
+                break
+
+        if not_in_image:
+            out[key] = key
     out[-1] = -1
     return out
 
 def restrict_dict(d, new_keys, unrestricted):
     out = {}
-    for key in unrestricted:
+    for key in set(unrestricted) - set(new_keys):
         out[key] = -1
     out[-1] = -1
     for key in new_keys:
@@ -742,7 +926,7 @@ def indicies(L,x):
            out.add(i)
    return out
 
-def good_candidates(S, out = [],T = False):
+def good_candidates(S, out = [], T = False):
 
     A = S.gens
     if isinstance(T,bool):
@@ -802,7 +986,7 @@ def good_candidates(S, out = [],T = False):
                    break
 
         #checks if f is aperiodic and has threshold less than that of the semigroup
-        if check:        
+        if check:
            i = 1
            temp = f
            while temp != temp * f:
@@ -904,7 +1088,7 @@ def possible_other_generators(S, out = [],T = False):
                    break
 
         #checks if f is aperiodic and has threshold less than that of the semigroup
-        if check:        
+        if check:
            i = 1
            temp = f
            found = []
