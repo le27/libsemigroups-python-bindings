@@ -26,10 +26,7 @@ class TestFpSemigroup(unittest.TestCase):
 
     def test_parse_word(self):
         S = FpSemigroup('~', [])
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         self.assertFalse(S._pure_letter_alphabet)
-=======
->>>>>>> semifp: Semigroup parent class compatability
         self.assertEqual(S._parse_word("~"),"~")
         S = FpSemigroup('a', [])
         self.assertEqual(S._parse_word("aa"),"aa")
@@ -228,7 +225,6 @@ class TestFpMonoid(unittest.TestCase):
         self.assertEqual(M.__repr__(),
                          "<fp monoid with 2 generators and 3 relations>")
 
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
 class Test_FPSOME(unittest.TestCase):
 
     def test_valid_init(self):
@@ -255,42 +251,10 @@ class Test_FPSOME(unittest.TestCase):
         b = "ba^3"
         self.assertTrue(FpS.equal(a, b))
         a = ""
-=======
-class TestFPSOME(unittest.TestCase):
-
-    def test_valid_init(self):
-        FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ba", "ab"]])
-        FPSOME(FpS,"aba")
-        FPSOME(FpS,"a")
-        FpS = FpSemigroup("mo", [["ooo", "o"]])
-        FPSOME(FpS, "moo")
-        FPSOME(FpS, "ooo")
-        FpS = FpSemigroup("cowie", [])
-        FPSOME(FpS,"cowie")
-        FpS2 = FpSemigroup('~', [])
-        FPSOME(FpS2,"~~")
-        with self.assertRaises(TypeError):
-            FPSOME("aba", "aba")
-        with self.assertRaises(TypeError):
-            FPSOME(FpS, FpS)
-        with self.assertRaises(ValueError):
-            FPSOME(FpS,"abc")
-
-    def test_eq_(self):
-        FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
-        a = FPSOME(FpS, "aba")
-        b = a
-        self.assertEqual(a, b)
-        a = FPSOME(FpS, "aaba")
-        b = FPSOME(FpS, "ba^3")
-        self.assertEqual(a, b)
-        a = FPSOME(FpS, "")
->>>>>>> semifp: Semigroup parent class compatability
         self.assertEqual(a, a)
 
     def test_ne_(self):
         FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         a = "aba"
         b = a + a
         self.assertFalse(FpS.equal(a, b))
@@ -305,32 +269,10 @@ class TestFPSOME(unittest.TestCase):
         FpS = FpMonoid("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
         a = FpS[1].get_value()
         self.assertEqual(a.identity().word, "1")
-=======
-        a = FPSOME(FpS, "aba")
-        b = a * a
-        self.assertNotEqual(a, b)
-        a = FPSOME(FpS, "aaba")
-        b = FPSOME(FpS, "ba^4")
-        self.assertNotEqual(a, b)
-
-    def test_identity(self):
-        FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
-        a = FPSOME(FpS, "aba")
-        self.assertEqual(a.identity(), FPSOME(FpS, ""))
-        FpS = FpMonoid("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
-        a = FPSOME(FpS, "aba")
-        self.assertEqual(a.identity(), FPSOME(FpS, ""))
-
-    def test_degree(self):
-        FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
-        a = FPSOME(FpS, "aba")
-        self.assertEqual(a.degree(), 0)
->>>>>>> semifp: Semigroup parent class compatability
 
     def test_mul(self):
         FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ba", "ab"]])
         other = "aa"
-<<<<<<< 78c561d6576cb1a687a9849a0ed88b5553d8eb96
         a = FpS[1].get_value()
         a * a
         self.assertEqual(a.word + a.word, (a * a).word)
@@ -342,22 +284,6 @@ class TestFPSOME(unittest.TestCase):
     def test_repr(self):
         FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ab", "ba"]])
         self.assertEqual(FpS[0].__repr__(), "'" + FpS[0].get_value().Repword + "'")
-=======
-        a = FPSOME(FpS, "aba")
-        a * a
-        e = FPSOME(FpS, "")
-        self.assertEqual(a * a, FPSOME(FpS, "abaaba"))
-        with self.assertRaises(ValueError):
-            e * e
-        with self.assertRaises(TypeError):
-            a * other
-        with self.assertRaises(TypeError):
-            FPSOME(FpSemigroup("ab", []), "aba") * a
-        
-    def test_repr(self):
-        FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ab", "ba"]])
-        self.assertEqual(FPSOME(FpS, "ab").__repr__(), "'ab'")
->>>>>>> semifp: Semigroup parent class compatability
 
 
 if __name__ == "__main__":
