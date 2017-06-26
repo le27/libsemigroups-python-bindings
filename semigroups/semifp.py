@@ -157,7 +157,6 @@ class FpSemigroup(libsemigroups.FpSemigroupNC):
         self.__check_word(word)
         return libsemigroups.FpSemigroupNC.word_to_class_index(self, word)
 
-
 class FpMonoid(FpSemigroup):
     def __init__(self, alphabet, rels):
         '''
