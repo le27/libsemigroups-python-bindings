@@ -17,6 +17,28 @@ class TestFpSemigroup(unittest.TestCase):
         FpSemigroup(['a'], [['a', 'aa']])
         FpSemigroup(['a', 'b'], [['b', 'aa']])
 
+    def test_parse_word(self):
+        S = FpSemigroup('~', [])
+        self.assertFalse(S._pure_letter_alphabet)
+        self.assertEqual(S._parse_word("~"),"~")
+        S = FpSemigroup('a', [])
+        self.assertEqual(S._parse_word("aa"),"aa")
+        self.assertEqual(S._parse_word("()(()())"),"")
+        self.assertEqual(S._parse_word("ba^10b"),"baaaaaaaaaab")
+        self.assertEqual(S._parse_word("((b)a)^3b"),"bababab")
+        with self.assertRaises(ValueError):
+            S._parse_word(")(")
+        with self.assertRaises(ValueError):
+            S._parse_word("(((b)^2(a))))")
+        with self.assertRaises(ValueError):
+            S._parse_word("(((b)^2)))((((a))(b))")
+        with self.assertRaises(ValueError):
+            S._parse_word("^2")
+        with self.assertRaises(ValueError):
+            S._parse_word("a^")
+        with self.assertRaises(ValueError):
+            S._parse_word("a^a")
+
     def test_alphabet_str(self):
         with self.assertRaises(ValueError):
             FpSemigroup([], [['a', 'aa']])
@@ -123,6 +145,67 @@ class TestFpMonoid(unittest.TestCase):
         M = FpMonoid(["a", "b"], [["aa", "a"], ["bbb", "ab"], ["ab", "ba"]])
         self.assertEqual(M.__repr__(),
                          "<fp monoid with 2 generators and 3 relations>")
+
+class Test_FPSOME(unittest.TestCase):
+
+    def test_valid_init(self):
+        FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ba", "ab"]])
+        FpS.equal("a", "aba")
+        FpS = FpSemigroup("mo", [["m", "mm"], ["ooo", "o"], ["mo", "om"]])
+        FpS.equal("moo", "ooo")
+        FpS = FpSemigroup("cowie", [["c", "o"], ["o", "w"], ["w", "i"],
+                                   ["i", "e"], ["ee", "e"]])
+        FpS.equal("cowie","cowie")
+        FpS2 = FpSemigroup('~', [["~~", "~"]])
+        FpS2.equal("~", "~~")
+        with self.assertRaises(TypeError):
+            FpS.equal(FpS, FpS)
+        with self.assertRaises(ValueError):
+            FpS.equal("abc", "abc")
+
+    def test_eq_(self):
+        FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
+        a = "aba"
+        b = a
+        self.assertTrue(FpS.equal(a, b))
+        a = "aaba"
+        b = "ba^3"
+        self.assertTrue(FpS.equal(a, b))
+        a = ""
+        self.assertEqual(a, a)
+
+    def test_ne_(self):
+        FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
+        a = "aba"
+        b = a + a
+        self.assertFalse(FpS.equal(a, b))
+        a = "aaba"
+        b = "ba^4"
+        self.assertFalse(FpS.equal(a, b))
+
+    def test_identity(self):
+        FpS = FpSemigroup("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
+        a = FpS[0].get_value()
+        self.assertEqual(a.identity().word, "")
+        FpS = FpMonoid("ab", [["a^10", "a"], ["bbb", "b"], ["ba", "ab"]])
+        a = FpS[1].get_value()
+        self.assertEqual(a.identity().word, "1")
+
+    def test_mul(self):
+        FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ba", "ab"]])
+        other = "aa"
+        a = FpS[1].get_value()
+        a * a
+        self.assertEqual(a.word + a.word, (a * a).word)
+        with self.assertRaises(TypeError):
+            a * other
+        with self.assertRaises(TypeError):
+            FpSemigroup("a", [["aa", "a"]])[0].get_value() * a
+
+    def test_repr(self):
+        FpS = FpSemigroup("ab", [["aa", "a"], ["bbb", "b"], ["ab", "ba"]])
+        self.assertEqual(FpS[0].__repr__(), "'" + FpS[0].get_value().Repword + "'")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -59,9 +59,9 @@ class Semigroup(libsemigroups.SemigroupNC):
                 x * x
             except:
                 raise TypeError(err_msg)
-
-        gens = [g if isinstance(g, ElementABC) else PythonElementNC(g)
-                for g in args]
+        gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
+                      "<class 'semigroups.semifp._FPSOME'>")
+                else PythonElementNC(g) for g in args]
         libsemigroups.SemigroupNC.__init__(self, gens)
 
     def right_cayley_graph(self):
