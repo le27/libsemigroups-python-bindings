@@ -8,7 +8,7 @@ clean:
 tests:
 	python2.7 -m nose --with-doctest
 	python3.6 -m nose --with-doctest
-
+	
 coverage: pip-install
 	coverage run -m unittest discover
 	coverage html
@@ -22,7 +22,7 @@ lint:
 	flake8 semigroups/*.py 
 	flake8  tests/test_*.py
 
-doc:
+doc: 
 	cd docs ; make html; cd ..
 	@echo "See: docs/_build/html/index.html" 
 
