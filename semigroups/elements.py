@@ -7,6 +7,7 @@ This module contains classes for representing elements of semigroups.
 
 import libsemigroups
 
+
 class Transformation(libsemigroups.TransformationNC):
     r'''
     Let :math:`n\in\mathbb{N}, \ X = \{0, \ldots, n - 1\}`. A
@@ -496,4 +497,3 @@ class PBR(libsemigroups.PBRNC):
                     self.__neg_out_neighbours.append(sorted(copy))
         return ('PBR(%s, %s)'
                 % (self.__pos_out_neighbours, self.__neg_out_neighbours))
-

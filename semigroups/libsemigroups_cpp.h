@@ -64,16 +64,9 @@ namespace libsemigroups {
     }
 
     void redefine(Element const* x, Element const* y) override {
-      PyObject* product;
-      if (static_cast<const PythonElement*>(x)->_value == Py_None) {
-        product = static_cast<const PythonElement*>(y)->_value;
-      } else if (static_cast<const PythonElement*>(y)->_value == Py_None) {
-        product = static_cast<const PythonElement*>(x)->_value;
-      } else {
-        product
+      PyObject* product
           = PyNumber_Multiply(static_cast<const PythonElement*>(x)->_value,
                               static_cast<const PythonElement*>(y)->_value);
-      }
       Py_DECREF(_value);
       _value = product;
       Py_INCREF(_value);
