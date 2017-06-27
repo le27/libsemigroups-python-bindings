@@ -166,7 +166,7 @@ class Semigroup(libsemigroups.SemigroupNC):
     #sends the tuple of a generator's image list (which determines the
     #transformation) to the power that the generator is raised to in a
     #factorisation of f
-    def aperiodic_commutative_membership_test(self, f):
+    def aperiodic_commutative_mem(self, f):
         if is_semilattice(self.gens):
             return self.semilattice_memb(f)
 
@@ -202,7 +202,8 @@ class Semigroup(libsemigroups.SemigroupNC):
         while f_i[-1] != f.identity():
             X_i.append(orbit(state, self.gens))
             k_i.append(hit(state, f_i[-1]))
-            f_i.append(f_i[-1] * invert_perm(prod(X_i[state][0][k_i[-1]], Transformation(list(range(n))))))
+            f_i.append(f_i[-1] * invert_perm(prod(X_i[state][0][k_i[-1]],
+                       Transformation(list(range(n))))))
 
             if not k_i[-1] in X_i[-1][1]:
                 return False
@@ -288,7 +289,7 @@ class Semigroup(libsemigroups.SemigroupNC):
 
             #The SCCs that elements of sources lie in. Here, SCC is used to
             #represent the SCC that a state is in.
-            self._sourceSCCs = [SCC for SCC in self._SCCs if
+            self._source_SCCs = [SCC for SCC in self._SCCs if
                                 self._sources.intersection(set(SCC)) != set()]
 
             self._SCCs_wo_redundencies = sorted(list(set(self._SCCs)))
@@ -298,49 +299,85 @@ class Semigroup(libsemigroups.SemigroupNC):
 
             self._gen_dicts_AO_SCCs = [AO_SCCs(generator, self._SCCs)
                                        for generator in self.gens]
-            self._gens_AO_SCCs = [Transformation(index_dict_function(a,
+            self._gens_AO_SCCs = [Transformation(dict_to_img_list(a,
                                                  self._SCCs_wo_redundencies,
                                               len(self._SCCs_wo_redundencies)))
                                   for a in self._gen_dicts_AO_SCCs]
 
             self._done_commute_membership = True
 
+        #The dict acts on the SCCs (tuples) by returning the SCC that f sends a
+        #given SCC to.
+        #The Transformation (f_AO_SCCs) is obtained by numbering the SCCs, and
+        #calculating the induced Transformation on {0, ..., n - 1}, where n is
+        #the number of SCCs.
         f_dict_AO_SCCs = AO_SCCs(f, self._SCCs)
-        f_AO_SCCs = Transformation(index_dict_function(f_dict_AO_SCCs,
+        f_AO_SCCs = Transformation(dict_to_img_list(f_dict_AO_SCCs,
                                                        self._SCCs,
                                                        self._no_SCCs))
 
         #The image of sources under f_dict_AO_SCCs.
-        Z = [f_dict_AO_SCCs[SCC] for SCC in self._sourceSCCs]
+        img_source_SCCs = [f_dict_AO_SCCs[SCC] for SCC in self._source_SCCs]
 
-        #An abelian group when restricted to the elements whose SCCs lie in Z.
-        IZ_set = set.intersection(*[stabiliser(SCC, self.gens, self._gen_dicts_AO_SCCs, self._states) for SCC in Z] + [set([tuple(self._states)])])
-        IZ = [Transformation(list(img_tup)) for img_tup in IZ_set]
-        hatA = [hat(g, self._SCCs, Z, self._states) for g in IZ]
+        #An abelian group when restricted to the elements whose SCCs lie in
+        #img_source_SCCs, comprising the stabilisers of img_source_SCCs.
+        img_source_SCCs_stabs_set = set.intersection(*[stabiliser(SCC, self.gens, self._gen_dicts_AO_SCCs,
+                                       self._states)
+                            for SCC in img_source_SCCs] +
+                           [set([tuple(self._states)])])
+        img_source_SCCs_stabs = [Transformation(list(img_tup))
+                                 for img_tup in img_source_SCCs_stabs_set]
+
+        #For any tranformation g in the centraliser of S, define a
+        #transformation hatg such that (x)hatg = (x)g if the SCC of x is in
+        #img_source_SCCs and g stabilises every SCC in img_source_SCCs.
+        #Otherwise set (x)hatg = x.
+        hatA = [hat(g, self._SCCs, img_source_SCCs, self._states)
+                for g in img_source_SCCs_stabs]
 
         #Step 2
-        f_AO_SCCs = Transformation(index_dict_function(f_dict_AO_SCCs, self._SCCs_wo_redundencies, len(self._SCCs_wo_redundencies)))
-        barS = Semigroup(self._gens_AO_SCCs)
-        mem_powers_of_f = barS.aperiodic_commutative_membership_test(f_AO_SCCs)
-        if not mem_powers_of_f[0]:
-            return False
-        g_a = Transformation(self._states)
-        for a in self.gens:
-            if tuple(index_dict_function(AO_SCCs(a, self._SCCs), self._SCCs, self._no_SCCs)) in mem_powers_of_f[1]:
-                g_a *= Transformation(list(a)) ** mem_powers_of_f[1][tuple(index_dict_function(AO_SCCs(a, self._SCCs), self._SCCs, self._no_SCCs))]
+        f_AO_SCCs =
+         Transformation(dict_to_img_list(f_dict_AO_SCCs,
+                                            self._SCCs_wo_redundencies,
+                                            len(self._SCCs_wo_redundencies)))
+        S_AO_SCCs = Semigroup(self._gens_AO_SCCs)
+        factorisation_of_f = S_AO_SCCs.aperiodic_commutative_mem(f_AO_SCCs)
 
+        if not factorisation_of_f[0]:
+            return False
+
+        #The aperiodic_candidate is an element of S, whose action on the SCCs is
+        #the same as the action of f, if such an element exists.
+        aperiodic_candidate = (prod([Transformation(list(a)) **
+                                     factorisation_of_f[1]
+                                    [tuple(dict_to_img_list(AO_SCCs(a,
+                                                                    self._SCCs),
+                                                            self._SCCs,
+                                                            self._no_SCCs))]
+                                     for a in self.gens
+                                     if tuple(dict_to_img_list(AO_SCCs(a,
+                                                                    self._SCCs),
+                                                               self._SCCs,
+                                                               self._no_SCCs))
+                                     in factorisation_of_f[1]]))
         #Step 3
-        g_a_img_list = list(g_a)
+        aperiodic_candidate_img_list = list(aperiodic_candidate)
         f_img_list = list(f)
-        hat_gc_dict = {}
+
+        #The perm_candidate is the tranformation that when composed with the
+        #aperiodic_candidate, gives f.
+        perm_candidate_dict = {}
         for i in self._sources:
-            hat_gc_dict[g_a_img_list[i]] = f_img_list[i]
-        for i in set(self._states) - set(hat_gc_dict.keys()):
-            hat_gc_dict[i] = i
-        hat_gc = Transformation(index_dict_function(hat_gc_dict, self._states, len(self._states)))
+            perm_candidate_dict[aperiodic_candidate_img_list[i]] = f_img_list[i]
+        for i in set(self._states) - set(perm_candidate_dict.keys()):
+            perm_candidate_dict[i] = i
+        perm_candidate = Transformation(dict_to_img_list(perm_candidate_dict,
+                                                         self._states,
+                                                         len(self._states)))
 
         #Step 4
-        return group_mem(hat_gc, hatA + [Transformation(self._states)])
+        #If the perm_candidate is not in hatS, then f is not in S.
+        return group_mem(perm_candidate, hatA + [Transformation(self._states)])
 
 def transformations_commute(a, b):
     n = a.degree()
@@ -350,13 +387,6 @@ def transformations_commute(a, b):
         if hit(hit(x, b), a) != hit(hit(x, a), b):
             return False
     return True
-
-def semi_to_trans_semi(S):
-    X = list(S)
-    G=[]
-    for e in S.gens:
-        G.append(Transformation([X.index(x * e) for x in X]))
-    return Semigroup(G)
 
 def invert_perm(f):
     outputs = list(f)
@@ -392,88 +422,6 @@ def orbit(l, A):
 
     return X_l_transformations, X_l
 
-#def abelian_transformation_group_membership(f, A):
-#    for a in A:
-#        if not transformations_commute(f, a):
-#            return False
-#    states = list(range(A[0].degree()))
-#    G = networkx.MultiGraph()
-#    for x in states:
-#        G.add_node(x)
-#    for generator in A:
-#        for index, image in enumerate(generator):
-#            G.add_edge(index, image)
-#    orbits = sorted([tuple(sorted(list(x))) for x in networkx.connected_components(G)])
-#
-#    orbit_restrictions = {tuple(f): restrict_trans(f, orbits)}
-#    for a in A:
-#        orbit_restrictions[tuple(a)] = restrict_trans(a, orbits)
-#
-#    restricted_gens = []
-#    for i, j in enumerate(orbits):
-#        restricted_gens.append(gens_trans_abelian_elt(orbit_restrictions[tuple(f)][i],
-#                                                      [orbit_restrictions[tuple(a)][i] for a in A]))
-#    b = [[restricted_gens[i].count(orbit_restrictions[tuple(a)][i]) for a in A] for i,j in enumerate(restricted_gens)]
-#    t = {}
-#    for i in range(len(A)):
-#        for a in A:
-#            t{(i,i)} = min(k s.t. g[i]**k in <gk+1 ... gr>)
-#            k = 1
-#            while orbit_restrictions[tuple(a)][i]
-#    return b
-
-#def gens_trans_abelian_elt(f, gens):
-#    tree = [cyclic_group_list(g) for g in gens]
-#    deg = gens[0].degree()
-#    n = x = len(tree)
-#    while x > 0:
-#        x -= 1
-#        current_group1 = tree[x]
-#        current_group2 = []
-#        if 2 * x + 1 < n:
-#            for i in tree[2 * x + 1]:
-#                for j in current_group1:
-#                    current_group2.append([i[0] * j[0], i[1] + j[1]])
-#            current_group1 = condense_list_by_1st_coordinate(current_group2)
-#            current_group2 = []
-#        if 2 * x < n:
-#            for i in tree[2 * x]:
-#                for j in current_group1:
-#                    current_group2.append([i[0] * j[0], i[1] + j[1]])
-#            current_group1 = condense_list_by_1st_coordinate(current_group2)
-#            current_group2 = []
-#        tree[x] = current_group1
-#    for x in tree[0]:
-#        if f == x[0]:
-#            return x[1]
-#    return False
-
-#def condense_list_by_1st_coordinate(L):
-#    found = []
-#    out = []
-#    for x in L:
-#        if not x[0] in found:
-#            out.append(x)
-#            found.append(x[0])
-#    return out
-
-#def cyclic_group_list(g):
-#    group = [[g.identity(), []]]
-#    current = g
-#    i = 1
-#    while current != g.identity():
-#        group.append([current,[g]*i])
-#        i += 1
-#        current *= g
-#    return group
-
-
-#def restrict_trans(T, S):
-#    out = {}
-#    for i,j in enumerate(S):
-#        out[i] = Transformation(list(map(lambda x: S[i].index(x),[hit(x, T) for x in j])))
-#    return out
-
 def idems_in_cen(A):
     M = FullTransformationMonoid(A[0].degree())
     Id = []
@@ -506,46 +454,6 @@ def is_commutative_and_aperiodic(S):
        if not pows[-1] * a == pows[-1]:
            return False
    return True
-
-def adj_mat(A, states):
-    G = networkx.MultiDiGraph()
-    for x in states:
-        G.add_node(x)
-    for generator in A:
-        for index, image in enumerate(generator):
-            G.add_edge(index, image)
-    return networkx.adjacency_matrix(G)
-
-#def aperiodic_commutative_membership_test(f, A):
-#    thresholds = {}
-#    for a in A:
-#        old_test = a.identity()
-#        test = a
-#        i = 0
-#        while old_test != test:
-#            i += 1
-#            old_test = test
-#            test *= a
-#        thresholds[tuple(a)] = i
-#    maxthreshold = max(thresholds.values())
-#
-#    powers = {}
-#    needed_states = set(range(A[0].degree()))
-#    for a in A:
-#        j = 0
-#        a_power_by_f = a * f
-#        a_power_by_f_old = f
-#       while not equal_on_states(a_power_by_f_old, a_power_by_f,needed_states):
-#            j += 1
-#            a_power_by_f_old = a_power_by_f
-#            a_power_by_f *= a
-#        powers[tuple(a)] = thresholds[tuple(a)] - j
-#        needed_states = needed_states.intersection(set(a**thresholds[tuple(a)]))
-#
-#    test_f = f.identity()
-#    for a in A:
-#        test_f *= a ** powers[tuple(a)]
-#    return test_f == f, powers
 
 def equal_on_states(a,b,states):
     out = True
@@ -587,9 +495,6 @@ def aperiod_james(f, A):
             powers[tuple(a)] = 0
             continue
 
-        print(a)
-        # old_test = restrict_dict(identity_d, restriction, states)
-        # test = restrict_dict(ad, restriction, states)
         old_test = identity_d.copy()
         test = ad.copy()
         i = 0
@@ -603,190 +508,20 @@ def aperiod_james(f, A):
         a_power_by_f = compose_dicts(fd, ad)
         a_power_by_f_old = fd.copy()
 
-        # print(a)
-        # print(a_power_by_f_old.values())
-        # print(a_power_by_f.values())
-
-        #while restrict_dict(a_power_by_f_old, restriction, states) != restrict_dict(a_power_by_f, restriction, states):
         while a_power_by_f_old != a_power_by_f:
             j += 1
             a_power_by_f_old = a_power_by_f.copy()
             a_power_by_f = compose_dicts(a_power_by_f, ad)
-            # print(a_power_by_f_old.values())
-            # print(a_power_by_f.values())
 
         a_power = pow_dict(ad, i - j, states)
         powers[tuple(a)] = i - j
 
-        print(i, j)
-
         restriction = list(set(a_power.values()).intersection(set(restriction)))
-        # print(restriction)
         fd = restrict_dict(compose_dicts(inverse_dict(a_power, states), fd), restriction, states)
-#        print(fd)
-#        fd = compose_dicts(inverse_dict(a_power, states), fd)
-
-        # fd_defined_on = [key for key in fd.keys() if fd[key] != -1]
-        #
-        # if restrict_dict(identity_d, fd_defined_on, states) == restrict_dict(fd, fd_defined_on, states):
-        #     break
     test_f = f.identity()
     for a in A:
         test_f *= a ** powers[tuple(a)]
     return test_f == f, powers
-
-def aperiod3(f, A):
-    powers = {}
-    restriction = list(range(f.degree()))
-    states = restriction[:]
-    fd = {-1: -1}
-    identity_d = {-1: -1}
-
-    A2 = sorted([(a.degree(), a) for a in A])
-
-    for x in states:
-        fd[x] = hit(x, f)
-        identity_d[x] = x
-
-    for atup in A2:
-        a = atup[1]
-        ad = {-1: -1}
-        for x in states:
-            ad[x] = hit(x, a)
-
-        not_in_fact = False
-        for x in restriction:
-            for y in restriction:
-                if hit(x, a) == hit(y, a) and hit(x, f) != hit(y, f):
-                    not_in_fact = True
-                    break
-        if not_in_fact:
-            powers[tuple(a)] = 0
-            continue
-
-        print(a)
-        # old_test = restrict_dict(identity_d, restriction, states)
-        # test = restrict_dict(ad, restriction, states)
-        old_test = identity_d.copy()
-        test = ad.copy()
-        i = 0
-
-        while restrict_dict(old_test, restriction, states) != restrict_dict(test, restriction, states):
-            i += 1
-            old_test = test.copy()
-            test = compose_dicts(test, ad)
-
-        j = 0
-        a_power_by_f = compose_dicts(fd, ad)
-        a_power_by_f_old = fd.copy()
-
-        # print(a)
-        # print(a_power_by_f_old.values())
-        # print(a_power_by_f.values())
-
-        #while restrict_dict(a_power_by_f_old, restriction, states) != restrict_dict(a_power_by_f, restriction, states):
-        while a_power_by_f_old != a_power_by_f:
-            j += 1
-            a_power_by_f_old = a_power_by_f.copy()
-            a_power_by_f = compose_dicts(a_power_by_f, ad)
-            # print(a_power_by_f_old.values())
-            # print(a_power_by_f.values())
-
-        a_power = pow_dict(ad, i - j, states)
-        powers[tuple(a)] = i - j
-
-        print(i, j)
-
-        restriction = list(set(a_power.values()).intersection(set(restriction)))
-        # print(restriction)
-        fd = restrict_dict(compose_dicts(inverse_dict(a_power, states), fd), restriction, states)
-#        print(fd)
-#        fd = compose_dicts(inverse_dict(a_power, states), fd)
-
-        # fd_defined_on = [key for key in fd.keys() if fd[key] != -1]
-        #
-        # if restrict_dict(identity_d, fd_defined_on, states) == restrict_dict(fd, fd_defined_on, states):
-        #     break
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** powers[tuple(a)]
-    return test_f == f, powers
-
-def aperiod2(f, A):
-    powers = {tuple(a): 0 for a in A}
-    restriction = list(range(f.degree()))
-    states = restriction[:]
-    fd = {-1: -1}
-    identity_d = {-1: -1}
-
-    for x in states:
-        fd[x] = hit(x, f)
-        identity_d[x] = x
-
-    done = False
-    for a in A:
-        ad = {-1: -1}
-        for x in states:
-            ad[x] = hit(x, a)
-
-        not_in_fact = False
-        for x in restriction:
-            for y in restriction:
-                if hit(x, a) == hit(y, a) and hit(x, f) != hit(y, f):
-                    not_in_fact = True
-                    break
-        if not_in_fact:
-            print(a)
-            continue
-
-        print('y', a)
-        old_test = identity_d.copy()
-        test = ad.copy()
-        i = 0
-
-        while restrict_dict(old_test, restriction, states) != restrict_dict(test, restriction, states):
-            i += 1
-            old_test = test.copy()
-            test = compose_dicts(test, ad)
-        print(i)
-
-        j = 0
-        while compose_dicts(fd, ad) != fd and i > 0:
-            powers[tuple(a)] = i
-            test_f = f.identity()
-            for b in A:
-                test_f *= b ** powers[tuple(b)]
-            if test_f == f:
-                done = True
-                break
-            j += 1
-            i -= 1
-
-            restriction = list(set(a ** j).intersection(set(restriction)))
-            # print(restriction)
-            fd = restrict_dict(compose_dicts(inverse_dict(ad, states), fd), restriction, states)
-            print(i, j)
-
-
-        powers[tuple(a)] = i
-
-        if done:
-            break
-
-
-
-#        print(fd)
-#        fd = compose_dicts(inverse_dict(a_power, states), fd)
-
-        # fd_defined_on = [key for key in fd.keys() if fd[key] != -1]
-        #
-        # if restrict_dict(identity_d, fd_defined_on, states) == restrict_dict(fd, fd_defined_on, states):
-        #     break
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** powers[tuple(a)]
-    return test_f == f, powers
-
 
 def pow_dict(d, power, states):
     out = {state: state for state in states}
@@ -854,7 +589,10 @@ def aperiodic_UF_commutative_membership_test(f, A):
         test_f *= a ** powers[tuple(a)]
     return test_f == f, powers
 
-def index_dict_function(g_dict, domain, n):
+#Given a transformation as a dictionary, its domain, and the size of its domain,
+#it indexes the domain and range of the tranformation, and returns the image
+#list of the transformation acting on these indicies.
+def dict_to_img_list(g_dict, domain, n):
     return [domain.index(g_dict[domain[i]]) for i in range(n)]
 
 def hit(x, f):
@@ -862,14 +600,19 @@ def hit(x, f):
         if i == x:
             return image
 
-def stabiliser(SCC, A, bargens, states):
-    return set([tuple(a) for a, barg in zip(A, bargens) if barg[SCC] == SCC]).union(set([tuple(states)]))
+def stabiliser(SCC, gens, gens_AO_SCCs, states):
+    return set([tuple(a) for a, a_AO_SCCs in zip(gens, gens_AO_SCCs)
+                if a_AO_SCCs[SCC] == SCC]).union(set([tuple(states)]))
 
-def hat(f, SCCs, Z, states):
+#For any tranformation g in the centraliser of S, define a
+#transformation hatg such that (x)hatg = (x)g if the SCC of x is in
+#img_source_SCCs and g stabilises every SCC in img_source_SCCs.
+#Otherwise set (x)hatg = x.
+def hat(f, SCCs, img_source_SCCs, states):
     #Gives transformation as image list
     d = {}
     for SCC in SCCs:
-        if SCC in Z:
+        if SCC in img_source_SCCs:
             for x in SCC:
                 d[x] = hit(x, f)
         else:
