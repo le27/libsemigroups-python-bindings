@@ -26,18 +26,17 @@ class Semigroup(libsemigroups.SemigroupNC):
         elif len(args) == 0:
             ValueError('there must be at least 1 argument')
 
-        gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
+        self.gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
                       "<class 'semigroups.semifp._FPSOME'>")
                 else PythonElementNC(g) for g in args]
         libsemigroups.SemigroupNC.__init__(self, self.gens)
         self._done_commute_in = False
 
     def isomorphic_transformation_semigroup(self):
-        X = list(S)
-        index_dict = {enumerate(X)}
+        X = list(self)
         G=[]
         for g in self.gens:
-            G.append(Transformation([index_dict[x * g] for x in X]))
+            G.append(Transformation([X.index(x * g) for x in X]))
         return Semigroup(G)
 
     def right_cayley_graph(self):
@@ -267,92 +266,6 @@ def bar_dict(f, SCCs):
                 break
     return d
 
-def good_candidates(S):
-    A = S.gens
-    thresholds = {}
-
-    for a in A:
-        old_test = a.identity()
-        test = a
-        i = 0
-        while old_test != test:
-            i += 1
-            old_test = test
-            test *= a
-        thresholds[tuple(a)] = i
-    maxthreshold = max(thresholds.values())
-    out = []
-
-    states = set(range(A[0].degree()))
-    edges = {}
-    for i in states:
-        for j in states:
-            edges[(i,j)] = []
-            for a in A:
-                if hit(i, a) == j:
-                    edges[(i,j)].append(a)
-<<<<<<< HEAD
-    reachable = []
-
-def aperiodic_UF_commutative_membership_test(f, A):
-    #luke conjectures this works but it doesn't
-=======
-
-    fixed_by_a_gen=[]
-    for a in A:
-        for i in range(A[0].degree()):
-            if hit(i, a) == i:
-                fixed_by_a_gen.append(i)
-
-
-
-    for f in FullTransformationMonoid(A[0].degree()):
-        check = True
-        #if check and f in S:
-        #    check = False
-        if check:
-            for a in A:
-                if not TCom(f, a):
-                    check = False
-                    break
-        if check:
-            i = 1
-            temp = f
-            while temp != temp * f:
-                if i > maxthreshold:
-                    check = False
-                    break
-                i += 1
-                temp *= f
-
-        if check:
-            image = list(f)
-            for i in set(image):
-                reached = set([i])
-                check2 = False
-                while not check2:
-                    check2 = True
-                    for j in states - reached:
-                        temp = set(reached)
-                        for k in temp:
-                            if edges[(j,k)] != []:
-                                reached.add(j)
-                                check2 = False
-                if not reached >= indecies(image,i):
-                    check = False
-                    break
-        if check:
-            check = False
-            for i in range(f.degree()):
-                if hit(i, f) == i:
-                    if i in fixed_by_a_gen:
-                        check = True
-                        break
-
-        if check:
-            out.append(f)
-    return out
-
 def is_commutative_and_aperiodic(S):
     A = S.gens
     for a1 in A:
@@ -400,62 +313,6 @@ def indecies(L,x):
             out.add(i)
     return out
 
-#def abelian_transformation_group_membership(f, A):
-#    for a in A:
-#        if not TCom(f, a):
-#            return False
-#    states = list(range(A[0].degree()))
-#    G = networkx.MultiGraph()
-#    for x in states:
-#        G.add_node(x)
-#    for generator in A:
-#        for index, image in enumerate(generator):
-#            G.add_edge(index, image)
-#    orbits = sorted([tuple(sorted(list(x))) for x in networkx.connected_components(G)])
-#
-#    orbit_restrictions = {tuple(f): restrict_trans(f, orbits)}
-#    for a in A:
-#        orbit_restrictions[tuple(a)] = restrict_trans(a, orbits)
-#
-#    restricted_gens = []
-#    for i, j in enumerate(orbits):
-#        restricted_gens.append(gens_trans_abelian_elt(orbit_restrictions[tuple(f)][i],
-#                                                      [orbit_restrictions[tuple(a)][i] for a in A]))
-#    b = [[restricted_gens[i].count(orbit_restrictions[tuple(a)][i]) for a in A] for i,j in enumerate(restricted_gens)]
-#    t = {}
-#    for i in range(len(A)):
-#        for a in A:
-#            t{(i,i)} = min(k s.t. g[i]**k in <gk+1 ... gr>)
-#            k = 1
-#            while orbit_restrictions[tuple(a)][i]
-#    return b
-
-#def gens_trans_abelian_elt(f, gens):
-#    tree = [cyclic_group_list(g) for g in gens]
-#    deg = gens[0].degree()
-#    n = x = len(tree)
-#    while x > 0:
-#        x -= 1
-#        current_group1 = tree[x]
-#        current_group2 = []
-#        if 2 * x + 1 < n:
-#            for i in tree[2 * x + 1]:
-#                for j in current_group1:
-#                    current_group2.append([i[0] * j[0], i[1] + j[1]])
-#            current_group1 = condense_list_by_1st_coordinate(current_group2)
-#            current_group2 = []
-#        if 2 * x < n:
-#            for i in tree[2 * x]:
-#                for j in current_group1:
-#                    current_group2.append([i[0] * j[0], i[1] + j[1]])
-#            current_group1 = condense_list_by_1st_coordinate(current_group2)
-#            current_group2 = []
-#        tree[x] = current_group1
-#    for x in tree[0]:
-#        if f == x[0]:
-#            return x[1]
-#    return False
-
 def condense_list_by_1st_coordinate(L):
     found = []
     out = []
@@ -465,221 +322,44 @@ def condense_list_by_1st_coordinate(L):
             found.append(x[0])
     return out
 
-def cyclic_group_list(g):
-    group = [[g.identity(), []]]
-    current = g
-    i = 1
-    while current != g.identity():
-        group.append([current,[g]*i])
-        i += 1
-        current *= g
-    return group
-
-def aperiodic_UF_commutative_membership_testL(f, A):
->>>>>>> b04e7ee... more nonscense
-    thresholds = {}
-    for a in A:
-        old_test = a.identity()
-        test = a
-        i = 0
-        while old_test != test:
-            i += 1
-            old_test = test
-            test *= a
-        thresholds[tuple(a)] = i
-    maxthreshold = max(thresholds.values())
-
-    powers = {}
-    for a in A:
-        j = 0
-        a_power_by_f = a * f
-        a_power_by_f_old = f
-        while a_power_by_f_old != a_power_by_f:
-            j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f *= a
-        powers[tuple(a)] = thresholds[tuple(a)] - j
-
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** powers[tuple(a)]
-    return test_f == f, powers
-
-def aperiodic_UF_commutative_membership_testL2(f, A):
-    thresholds = {}
-    for a in A:
-        old_test = a.identity()
-        test = a
-        i = 0
-        while old_test != test:
-            i += 1
-            old_test = test
-            test *= a
-        thresholds[tuple(a)] = i
-    maxthreshold = max(thresholds.values())
-
-    powers = {}
-    f2 = f
-    for a in A:
-        j = 0
-        a_power_by_f = a * f2
-        a_power_by_f_old = f2
-        while a_power_by_f_old != a_power_by_f:
-            j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f *= a
-        powers[tuple(a)] = thresholds[tuple(a)] - j
-        f2 = a_power_by_f
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** powers[tuple(a)]
-    return test_f == f, powers
-
-def aperiodic_UF_commutative_membership_testJ(f, A):
-    thresholds = {}
-    for a in A:
-        old_test = a.identity()
-        test = a
-        i = 0
-        while old_test != test:
-            i += 1
-            old_test = test
-            test *= a
-        thresholds[tuple(a)] = i
-    maxthreshold = max(thresholds.values())
-
-    powers = {}
-    needed_states = set(range(A[0].degree()))
-    for a in A:
-        j = 0
-        a_power_by_f = a * f
-        a_power_by_f_old = f
-        while not equal_on_set(a_power_by_f_old, a_power_by_f,needed_states):
-            j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f *= a
-        powers[tuple(a)] = thresholds[tuple(a)] - j
-        needed_states = needed_states.intersection(set(a ** thresholds[tuple(a)]))
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** powers[tuple(a)]
-    return test_f == f, powers
-
-def aperiodic_UF_commutative_membership_testJ2(f, A):
-    thresholds = {}
-    for a in A:
-        old_test = a.identity()
-        test = a
-        i = 0
-        while old_test != test:
-            i += 1
-            old_test = test
-            test *= a
-        thresholds[tuple(a)] = i
-    maxthreshold = max(thresholds.values())
-
-    powers = {}
-    f2 = f
-    needed_states = set(range(A[0].degree()))
-    for a in A:
-        j = 0
-        a_power_by_f = a * f2
-        a_power_by_f_old = f2
-        while not equal_on_set(a_power_by_f_old, a_power_by_f,needed_states):
-            j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f *= a
-        powers[tuple(a)] = thresholds[tuple(a)] - j
-        f2 = a_power_by_f
-        needed_states = needed_states.intersection(set(a ** thresholds[tuple(a)]))
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** powers[tuple(a)]
-    return test_f == f, powers
-
-def aperiodic_UF_commutative_membership_testJ3(f, A):
-    states = set(range(A[0].degree()))
-    powers = {}
-    f2 = f
-    needed_states = set(range(A[0].degree()))
-    for a in A:
-        j = 0
-        a_power_by_f = a * f2
-        a_power_by_f_old = f2
-        while not equal_on_set(a_power_by_f_old, a_power_by_f, needed_states):
-            j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f *= a
-        powers[tuple(a)] = (threshold_of_aperiodic_restricted(a, needed_states), j)
-        f2 = a_power_by_f
-        needed_states = needed_states.intersection(set(a ** threshold_of_aperiodic_restricted(a, needed_states)))
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** (powers[tuple(a)][0] - powers[tuple(a)][1])
-    return test_f == f, powers
-
-def aperiodic_UF_commutative_membership_testJ4(f, A):
-    states = set(range(A[0].degree()))
-    powers = {}
-    f2 = f
-    needed_states = set(range(A[0].degree()))
-    for a in A:
-        j = 0
-        a_power_by_f = f2 * a
-        a_power_by_f_old = f2
-        while not equal_on_set(a_power_by_f_old, a_power_by_f, needed_states):
-            j += 1
-            a_power_by_f_old = a_power_by_f
-            a_power_by_f = a_power_by_f * a
-        powers[tuple(a)] = (threshold_of_aperiodic_restricted(a, needed_states), j)
-        f2 = f * pseudo_trans_inverse_restricted(a_power_by_f, needed_states)
-        needed_states = needed_states.intersection(set(a ** j))
-    test_f = f.identity()
-    for a in A:
-        test_f *= a ** (powers[tuple(a)][0] - powers[tuple(a)][1])
-    return test_f == f, powers
-
-def aperiodic_UF_commutative_membership_testJ5(Trans, A):
+def aperiodic_commutative_membership_test(f, A):
     if len(A) != 0:
-        assert(Trans.degree() == A[0].degree())
-    return mem(Transformation(list(Trans) + [Trans.degree()]), [Transformation(list(a) + [a.degree()]) for a in A])
+        if f.degree() != A[0].degree():
+            return False, False
+    f, A = Transformation(list(f) + [f.degree()]), [Transformation(list(a) + [a.degree()]) for a in A]
+    powers =[]
+    current_f = f
+    for a in A:
+        defined_states = [s for s in range(current_f.degree()) if hit(s, current_f) != current_f.degree() - 1]
+        if all(hit(s, current_f) in [s, current_f.degree() - 1] for s in range(current_f.degree())):
+            powers += [0] * (len(A) - A.index(a))
+            break
+        gen = a
 
-def mem(f, A):
-    defined_states = [s for s in range(f.degree()) if hit(s, f) != f.degree() - 1]
-    if len(A)== 0:
-        return [f,[]]
-    if all(hit(s, f) in [s, f.degree() - 1] for s in range(f.degree())):
-        return [True, [0] * len(A)]
-    gen = A[0]
+        threshold = 0
+        temp = gen.identity()
 
-    threshold = 0
-    temp = gen.identity()
+        while not all(hit(s, temp) == hit(s, temp * gen) for s in defined_states):
+            threshold += 1
+            temp *= gen
 
-    while not all(hit(s, temp) == hit(s, temp * gen) for s in defined_states):
-        threshold += 1
-        temp *= gen
+        j = 0
+        temp = current_f
+        while temp != temp * gen:
+            j += 1
+            temp *= gen
+        if threshold < j:
+            return False, False
+        powers.append(threshold - j)
+        gen_part_of_current_f = gen ** (threshold - j)
 
-    j = 0
-    temp = f
-    while temp != temp * gen:
-        j += 1
-        temp *= gen
-    assert(threshold >= j)
+        inv = left_psudo_inverse(gen_part_of_current_f)
 
-    gen_part_of_f = gen ** (threshold - j)
-
-    inv = left_psudo_inverse(gen_part_of_f)
-
-    assert(all(hit(a,inv * gen_part_of_f) == a for a in gen_part_of_f))
-    fp_res = Transformation([hit(a,inv * f) if a in gen_part_of_f else f.degree() - 1 for a in range(f.degree())])
-
-    out = mem(fp_res, A[1:])
-
-    powers = [threshold - j] + out[1]
+        fp_res = Transformation([hit(x, inv * current_f) if x in gen_part_of_current_f else current_f.degree() - 1 for x in range(current_f.degree())])
+        current_f = fp_res
 
     testprod = prod([x[0] ** x[1] for x in zip(A,powers)])
-    test = all(hit(s, testprod) == hit(s, f) for s in defined_states)
-    return [test, powers]
+    return testprod == f, dict(zip([tuple(a) for a in A], powers))
 
 def left_psudo_inverse(T):
     image =[]
@@ -689,31 +369,6 @@ def left_psudo_inverse(T):
          else:
              image.append(i)
     return Transformation(image)
-
-def pseudo_trans_inverse_restricted(T, S):
-    inverse = {}
-    for i in list(T):
-        for s in S:
-            if hit(s, T) == i:
-                inverse[s] = i
-                break
-    for i in set(range(T.degree())) - set(inverse.keys()):
-        inverse[i] = i
-    return Transformation([inverse[i] for i in range(len(inverse))])
-
-def equal_on_set(a,b,states):
-    for i in states:
-        if not hit(i, a) == hit(i, b):
-            return False
-    return True
-
-def threshold_of_aperiodic_restricted(T, S):
-    i = 0
-    temp = T.identity()
-    while not equal_on_set(temp,temp * T,S):
-        temp *= T
-        i+=1
-    return i
 
 def prod(L, identity = 0):
     if len(L) == 0:
