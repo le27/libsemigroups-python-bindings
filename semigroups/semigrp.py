@@ -147,9 +147,9 @@ class Semigroup(libsemigroups.SemigroupNC):
     #sends the tuple of a generator's image list (which determines the
     #transformation) to the power that the generator is raised to in a
     #factorisation of f.
-    def semilattice_memb(self, f):
+    def _semilattice_memb(self, f):
         for generator in self.gens:
-            if not transformations_commute(f, generator):
+            if not _transformations_commute(f, generator):
                 return False, {}
 
         factors = []
@@ -166,12 +166,12 @@ class Semigroup(libsemigroups.SemigroupNC):
     #sends the tuple of a generator's image list (which determines the
     #transformation) to the power that the generator is raised to in a
     #factorisation of f
-    def aperiodic_commutative_mem(self, f):
+    def _aperiodic_commutative_mem(self, f):
         if is_semilattice(self.gens):
-            return self.semilattice_memb(f)
+            return self._semilattice_memb(f)
 
         #Uses the function which assumes that self has unique factorisation
-        #into generators to test if if is in self.
+        #into generators to test if f is in self.
         UF_membership = aperiodic_UF_commutative_membership_test(f, self.gens)
         if UF_membership[0]:
             return UF_membership
@@ -189,10 +189,10 @@ class Semigroup(libsemigroups.SemigroupNC):
 
         return True, powers
 
-    def group_mem(self, f):
+    def _group_mem(self, f):
         n = self.gens[0].degree()
         k_i = [hit(0, f)]
-        X_i = [orbit(0, self.gens)]
+        X_i = [self._orbit(0)]
 
         if not k_i[0] in X_i[0][1]:
             return False
@@ -200,9 +200,9 @@ class Semigroup(libsemigroups.SemigroupNC):
 
         state = 1
         while f_i[-1] != f.identity():
-            X_i.append(orbit(state, self.gens))
+            X_i.append(self._orbit(state))
             k_i.append(hit(state, f_i[-1]))
-            f_i.append(f_i[-1] * invert_perm(prod(X_i[state][0][k_i[-1]],
+            f_i.append(f_i[-1] * _invert_perm(prod(X_i[state][0][k_i[-1]],
                        Transformation(list(range(n))))))
 
             if not k_i[-1] in X_i[-1][1]:
@@ -212,7 +212,28 @@ class Semigroup(libsemigroups.SemigroupNC):
 
         return True
 
-    def SCCs(self, states):
+    def _orbit(self, l):
+        X_l = {l}
+        X_l_transformations = {l:()}
+        for a in self.gens:
+            new1 = X_l.copy()
+            new2 = X_l.copy()
+            test = True
+            while test:
+                test = False
+                new1 = set(new2)
+                new2 = set()
+                for x in new1:
+                    h = hit(x, a)
+                    if (not h in X_l) and (not h in new2):
+                        X_l.add(h)
+                        new2.add(h)
+                        X_l_transformations[h] = X_l_transformations[x] + (a,)
+                        test = True
+
+        return X_l_transformations, X_l
+
+    def _SCCs(self, states):
         G = networkx.MultiDiGraph()
         for x in states:
             G.add_node(x)
@@ -223,7 +244,7 @@ class Semigroup(libsemigroups.SemigroupNC):
                        for x in networkx.strongly_connected_components(G)])
 
     #gives transformation as dictionary, with keys as input, values as image
-    def AO_SCCs(self, f):
+    def _AO_SCCs(self, f):
         d = {}
         for SCC in self._SCCs:
             image = hit(SCC[0], f)
@@ -233,7 +254,7 @@ class Semigroup(libsemigroups.SemigroupNC):
                     break
         return d
 
-    def commutative_membership(self, f):
+    def _commutative_membership(self, f):
         r"""
         A semigroup :math:`S` is *commutative* if :math:`\forall a,b\in S\quad
         ab = ba`. This function implements a polynomial time complexity
@@ -271,7 +292,7 @@ class Semigroup(libsemigroups.SemigroupNC):
 
         #Step 0
         for generator in self.gens:
-            if not transformations_commute(f, generator):
+            if not _transformations_commute(f, generator):
                 return False
 
         if not self._done_commute_membership:
@@ -279,7 +300,7 @@ class Semigroup(libsemigroups.SemigroupNC):
             self._states = list(range(n))
 
             #The SCCs of states.
-            self._SCCs = self.SCCs(self._states)
+            self._SCCs = self._SCCs(self._states)
             self._no_SCCs = len(self._SCCs)
 
             #sources is the union of the source SCCs of states
@@ -297,7 +318,7 @@ class Semigroup(libsemigroups.SemigroupNC):
             #A transformation with the suffix AO_SCCs, denotes its action on
             #the SCCs.
 
-            self._gen_dicts_AO_SCCs = [AO_SCCs(generator, self._SCCs)
+            self._gen_dicts_AO_SCCs = [self._AO_SCCs(generator)
                                        for generator in self.gens]
             self._gens_AO_SCCs = [Transformation(dict_to_img_list(a,
                                                  self._SCCs_wo_redundencies,
@@ -311,7 +332,7 @@ class Semigroup(libsemigroups.SemigroupNC):
         #The Transformation (f_AO_SCCs) is obtained by numbering the SCCs, and
         #calculating the induced Transformation on {0, ..., n - 1}, where n is
         #the number of SCCs.
-        f_dict_AO_SCCs = AO_SCCs(f, self._SCCs)
+        f_dict_AO_SCCs = self._AO_SCCs(f)
         f_AO_SCCs = Transformation(dict_to_img_list(f_dict_AO_SCCs,
                                                        self._SCCs,
                                                        self._no_SCCs))
@@ -341,7 +362,7 @@ class Semigroup(libsemigroups.SemigroupNC):
                                             self._SCCs_wo_redundencies,
                                             len(self._SCCs_wo_redundencies)))
         S_AO_SCCs = Semigroup(self._gens_AO_SCCs)
-        factorisation_of_f = S_AO_SCCs.aperiodic_commutative_mem(f_AO_SCCs)
+        factorisation_of_f = S_AO_SCCs._aperiodic_commutative_mem(f_AO_SCCs)
 
         if not factorisation_of_f[0]:
             return False
@@ -350,13 +371,11 @@ class Semigroup(libsemigroups.SemigroupNC):
         #the same as the action of f, if such an element exists.
         aperiodic_candidate = (prod([Transformation(list(a)) **
                                      factorisation_of_f[1]
-                                    [tuple(dict_to_img_list(AO_SCCs(a,
-                                                                    self._SCCs),
+                                    [tuple(dict_to_img_list(self._AO_SCCs(a),
                                                             self._SCCs,
                                                             self._no_SCCs))]
                                      for a in self.gens
-                                     if tuple(dict_to_img_list(AO_SCCs(a,
-                                                                    self._SCCs),
+                                     if tuple(dict_to_img_list(self._AO_SCCs(a),
                                                                self._SCCs,
                                                                self._no_SCCs))
                                      in factorisation_of_f[1]]))
@@ -377,9 +396,9 @@ class Semigroup(libsemigroups.SemigroupNC):
 
         #Step 4
         #If the perm_candidate is not in hatS, then f is not in S.
-        return group_mem(perm_candidate, hatA + [Transformation(self._states)])
+        return _group_mem(perm_candidate, hatA + [Transformation(self._states)])
 
-def transformations_commute(a, b):
+def _transformations_commute(a, b):
     n = a.degree()
     if b.degree() != n:
         return False
@@ -388,7 +407,7 @@ def transformations_commute(a, b):
             return False
     return True
 
-def invert_perm(f):
+def _invert_perm(f):
     outputs = list(f)
     return Transformation([outputs.index(i) for i in range(f.degree())])
 
@@ -401,51 +420,10 @@ def is_semilattice(A):
             break
     return band
 
-def orbit(l, A):
-    X_l = {l}
-    X_l_transformations = {l:()}
-    for a in A:
-        new1 = X_l
-        new2 = X_l
-        test = True
-        while test:
-            test = False
-            new1 = set(new2)
-            new2 = set()
-            for x in new1:
-                h = hit(x, a)
-                if (not h in X_l) and (not h in new2):
-                    X_l.add(h)
-                    new2.add(h)
-                    X_l_transformations[h] = X_l_transformations[x] + (a,)
-                    test = True
-
-    return X_l_transformations, X_l
-
-def idems_in_cen(A):
-    M = FullTransformationMonoid(A[0].degree())
-    Id = []
-    for m in M:
-        if m * m == m:
-            Id.append(m)
-    out = set()
-    for m in Id:
-        com = True
-        for a in A:
-            if not transformations_commute(a, m):
-                com = False
-                break
-        if com:
-            out.add(tuple(m))
-    out2 = []
-    for m in out:
-        out2.append(Transformation(list(m)))
-    return out2
-
 def is_commutative_and_aperiodic(S):
    A = S.gens
    for a1 in A:
-       if not all(transformations_commute(a1, a2) for a2 in A):
+       if not all(_transformations_commute(a1, a2) for a2 in A):
            return False
    for a in A:
        pows = [a]
@@ -724,7 +702,7 @@ def good_candidates(S, out = [], T = False):
         #checks if f commutes with generators
         if check:
            for a in A:
-               if not transformations_commute(f, a):
+               if not _transformations_commute(f, a):
                    check = False
                    break
 
@@ -826,7 +804,7 @@ def possible_other_generators(S, out = [],T = False):
         #checks if f commutes with generators
         if check:
            for a in A:
-               if not transformations_commute(f, a):
+               if not _transformations_commute(f, a):
                    check = False
                    break
 
@@ -848,7 +826,7 @@ def possible_other_generators(S, out = [],T = False):
 def is_commutative_and_aperiodic(S):
    A = S.gens
    for a1 in A:
-       if not all(transformations_commute(a1, a2) for a2 in A):
+       if not all(_transformations_commute(a1, a2) for a2 in A):
            return False
    for a in A:
        pows = [a]
