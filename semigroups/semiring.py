@@ -567,7 +567,6 @@ class TropicalMaxPlusSemiring(SemiringWithThresholdABC):
 
         if threshold < 0:
             raise ValueError('Threshold must be non-negative')
-
         self._threshold = threshold
 
     def plus(self, x, y):
@@ -600,7 +599,6 @@ class TropicalMaxPlusSemiring(SemiringWithThresholdABC):
             raise ValueError('Arguments must be positive')
         if (x > self._threshold) or (y > self._threshold):
             raise ValueError('Arguments must not be greater than the threshold')
-
         return max(x, y)
 
     def prod(self, x, y):
@@ -754,7 +752,6 @@ class TropicalMinPlusSemiring(SemiringWithThresholdABC):
         if ((x > self._threshold and x != float('inf')) or
                 (y > self._threshold and y != float('inf'))):
             raise ValueError('Arguments must not be greater than the threshold')
-
         return min(x, y)
 
     def prod(self, x, y):
@@ -822,7 +819,6 @@ class TropicalMinPlusSemiring(SemiringWithThresholdABC):
 
         Returns:
             int:    0
-
         Raises:
             TypeError:  If any argument is given.
 

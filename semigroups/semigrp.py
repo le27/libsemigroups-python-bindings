@@ -7,6 +7,7 @@ import libsemigroups
 from semigroups.elements import Transformation
 from semigroups.cayley_graph import CayleyGraph
 from libsemigroups import ElementABC, PythonElementNC
+import networkx
 
 class Semigroup(libsemigroups.SemigroupNC):
     r'''
@@ -60,9 +61,11 @@ class Semigroup(libsemigroups.SemigroupNC):
             except:
                 raise TypeError(err_msg)
 
-        gens = [g if isinstance(g, ElementABC) else PythonElementNC(g)
-                for g in args]
-        libsemigroups.SemigroupNC.__init__(self, gens)
+        self.gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
+                      "<class 'semigroups.semifp.FPSOME'>")
+                else PythonElementNC(g) for g in args]
+        libsemigroups.SemigroupNC.__init__(self, self.gens)
+        self._done_commute_membership = False
 
     def right_cayley_graph(self):
         r"""
@@ -92,6 +95,7 @@ class Semigroup(libsemigroups.SemigroupNC):
             >>> G.nodes()
             [0, 1, 2, 3]
         """
+
         G = CayleyGraph()
         G._adjacencies_list = libsemigroups.SemigroupNC.right_cayley_graph(self)
         for i, adjacencies in enumerate(G._adjacencies_list):
@@ -139,6 +143,507 @@ class Semigroup(libsemigroups.SemigroupNC):
                 G._add_edge_with_label(j, (i, adj))
         return G
 
+    #Returns whether or not f is in self, together with a dictionary, which
+    #sends the tuple of a generator's image list (which determines the
+    #transformation) to the power that the generator is raised to in a
+    #factorisation of f.
+    def _semilattice_memb(self, f):
+        for generator in self.gens:
+            if not _transformations_commute(f, generator):
+                return False, {}
+
+        factors = []
+        powers_of_factors = {}
+        for gen in self.gens:
+            if gen * f == f:
+                powers_of_factors[tuple(gen)] = 1
+                factors.append(gen)
+            else:
+                powers_of_factors[tuple(gen)] = 0
+        return f == prod(factors, f.identity()), powers_of_factors
+
+    #Returns whether or not f is in self, together with a dictionary, which
+    #sends the tuple of a generator's image list (which determines the
+    #transformation) to the power that the generator is raised to in a
+    #factorisation of f
+    def _aperiodic_commutative_mem(self, f):
+        if is_semilattice(self.gens):
+            return self._semilattice_memb(f)
+
+        #Uses the function which assumes that self has unique factorisation
+        #into generators to test if f is in self.
+        UF_membership = aperiodic_UF_commutative_membership_test(f, self.gens)
+        if UF_membership[0]:
+            return UF_membership
+
+        if not f in self:
+            return False
+
+        factorisation = self.factorisation(f)
+
+        powers = {}
+        for gen in self.gens:
+            powers[tuple(gen)] = 0
+        for gen_index in factorisation:
+            powers[tuple(self.gens[gen_index])] += 1
+
+        return True, powers
+
+    def _group_mem(self, f):
+        n = self.gens[0].degree()
+        k_i = [hit(0, f)]
+        X_i = [self._orbit(0)]
+
+        if not k_i[0] in X_i[0][1]:
+            return False
+        f_i = [f]
+
+        state = 1
+        while f_i[-1] != f.identity():
+            X_i.append(self._orbit(state))
+            k_i.append(hit(state, f_i[-1]))
+            f_i.append(f_i[-1] * _invert_perm(prod(X_i[state][0][k_i[-1]],
+                       Transformation(list(range(n))))))
+
+            if not k_i[-1] in X_i[-1][1]:
+                return False
+
+            state += 1
+
+        return True
+
+    def _orbit(self, l):
+        X_l = {l}
+        X_l_transformations = {l:()}
+        for a in self.gens:
+            new1 = X_l.copy()
+            new2 = X_l.copy()
+            test = True
+            while test:
+                test = False
+                new1 = set(new2)
+                new2 = set()
+                for x in new1:
+                    h = hit(x, a)
+                    if (not h in X_l) and (not h in new2):
+                        X_l.add(h)
+                        new2.add(h)
+                        X_l_transformations[h] = X_l_transformations[x] + (a,)
+                        test = True
+
+        return X_l_transformations, X_l
+
+    def _SCCs(self, states):
+        G = networkx.MultiDiGraph()
+        for x in states:
+            G.add_node(x)
+        for generator in self.gens:
+            for index, image in enumerate(generator):
+                G.add_edge(index, image)
+        return sorted([tuple(sorted(list(x)))
+                       for x in networkx.strongly_connected_components(G)])
+
+    #gives transformation as dictionary, with keys as input, values as image
+    def _AO_SCCs(self, f):
+        d = {}
+        for SCC in self._SCCs:
+            image = hit(SCC[0], f)
+            for SCC2 in self._SCCs:
+                if image in SCC2:
+                    d[SCC] = SCC2
+                    break
+        return d
+
+    def _commutative_membership(self, f):
+        r"""
+        A semigroup :math:`S` is *commutative* if :math:`\forall a,b\in S\quad
+        ab = ba`. This function implements a polynomial time complexity
+        algorithm to test if a given transformation is in a commutative
+        transformation semigroup.
+
+        Args:
+            semigroups.elements.Transformation: A transformation to test.
+
+        Raises:
+            awaeds
+
+        Returns:
+            bool: Whether or not the semigroup is commutative.
+
+        Examples:
+            >>> from semigroups import Semigroup
+            >>> S = Semigroup(complex(0, 1))
+            >>> G = S.right_cayley_graph()
+            >>> G.ordered_adjacencies()
+            [[1], [2], [3], [0]]
+            >>> G.edges()
+            [(0, 1), (1, 2), (2, 3), (3, 0)]
+            >>> G.nodes()
+            [0, 1, 2, 3]
+        """
+        if self.is_done():
+            return f in self
+
+        #Ensure f has same degree as elts of self.gens, the generating set
+        n = self.gens[0].degree()
+
+        if f.degree() != n:
+            return False
+
+        #Step 0
+        for generator in self.gens:
+            if not _transformations_commute(f, generator):
+                return False
+
+        if not self._done_commute_membership:
+            #Step 1
+            self._states = list(range(n))
+
+            #The SCCs of states.
+            self._SCCs = self._SCCs(self._states)
+            self._no_SCCs = len(self._SCCs)
+
+            #sources is the union of the source SCCs of states
+            self._sources = (set(self._states) -
+                             set([hit(x, a) for x in self._states
+                                            for a in self.gens]))
+
+            #The SCCs that elements of sources lie in. Here, SCC is used to
+            #represent the SCC that a state is in.
+            self._source_SCCs = [SCC for SCC in self._SCCs if
+                                self._sources.intersection(set(SCC)) != set()]
+
+            self._SCCs_wo_redundencies = sorted(list(set(self._SCCs)))
+
+            #A transformation with the suffix AO_SCCs, denotes its action on
+            #the SCCs.
+
+            self._gen_dicts_AO_SCCs = [self._AO_SCCs(generator)
+                                       for generator in self.gens]
+            self._gens_AO_SCCs = [Transformation(dict_to_img_list(a,
+                                                 self._SCCs_wo_redundencies,
+                                              len(self._SCCs_wo_redundencies)))
+                                  for a in self._gen_dicts_AO_SCCs]
+
+            self._done_commute_membership = True
+
+        #The dict acts on the SCCs (tuples) by returning the SCC that f sends a
+        #given SCC to.
+        #The Transformation (f_AO_SCCs) is obtained by numbering the SCCs, and
+        #calculating the induced Transformation on {0, ..., n - 1}, where n is
+        #the number of SCCs.
+        f_dict_AO_SCCs = self._AO_SCCs(f)
+        f_AO_SCCs = Transformation(dict_to_img_list(f_dict_AO_SCCs,
+                                                       self._SCCs,
+                                                       self._no_SCCs))
+
+        #The image of sources under f_dict_AO_SCCs.
+        img_source_SCCs = [f_dict_AO_SCCs[SCC] for SCC in self._source_SCCs]
+
+        #An abelian group when restricted to the elements whose SCCs lie in
+        #img_source_SCCs, comprising the stabilisers of img_source_SCCs.
+        img_source_SCCs_stabs_set = set.intersection(*[stabiliser(SCC, self.gens, self._gen_dicts_AO_SCCs,
+                                       self._states)
+                            for SCC in img_source_SCCs] +
+                           [set([tuple(self._states)])])
+        img_source_SCCs_stabs = [Transformation(list(img_tup))
+                                 for img_tup in img_source_SCCs_stabs_set]
+
+        #For any tranformation g in the centraliser of S, define a
+        #transformation hatg such that (x)hatg = (x)g if the SCC of x is in
+        #img_source_SCCs and g stabilises every SCC in img_source_SCCs.
+        #Otherwise set (x)hatg = x.
+        hatA = [hat(g, self._SCCs, img_source_SCCs, self._states)
+                for g in img_source_SCCs_stabs]
+
+        #Step 2
+        f_AO_SCCs =
+         Transformation(dict_to_img_list(f_dict_AO_SCCs,
+                                            self._SCCs_wo_redundencies,
+                                            len(self._SCCs_wo_redundencies)))
+        S_AO_SCCs = Semigroup(self._gens_AO_SCCs)
+        factorisation_of_f = S_AO_SCCs._aperiodic_commutative_mem(f_AO_SCCs)
+
+        if not factorisation_of_f[0]:
+            return False
+
+        #The aperiodic_candidate is an element of S, whose action on the SCCs is
+        #the same as the action of f, if such an element exists.
+        aperiodic_candidate = (prod([Transformation(list(a)) **
+                                     factorisation_of_f[1]
+                                    [tuple(dict_to_img_list(self._AO_SCCs(a),
+                                                            self._SCCs,
+                                                            self._no_SCCs))]
+                                     for a in self.gens
+                                     if tuple(dict_to_img_list(self._AO_SCCs(a),
+                                                               self._SCCs,
+                                                               self._no_SCCs))
+                                     in factorisation_of_f[1]]))
+        #Step 3
+        aperiodic_candidate_img_list = list(aperiodic_candidate)
+        f_img_list = list(f)
+
+        #The perm_candidate is the tranformation that when composed with the
+        #aperiodic_candidate, gives f.
+        perm_candidate_dict = {}
+        for i in self._sources:
+            perm_candidate_dict[aperiodic_candidate_img_list[i]] = f_img_list[i]
+        for i in set(self._states) - set(perm_candidate_dict.keys()):
+            perm_candidate_dict[i] = i
+        perm_candidate = Transformation(dict_to_img_list(perm_candidate_dict,
+                                                         self._states,
+                                                         len(self._states)))
+
+        #Step 4
+        #If the perm_candidate is not in hatS, then f is not in S.
+        return _group_mem(perm_candidate, hatA + [Transformation(self._states)])
+
+def _transformations_commute(a, b):
+    n = a.degree()
+    if b.degree() != n:
+        return False
+    for x in range(n):
+        if hit(hit(x, b), a) != hit(hit(x, a), b):
+            return False
+    return True
+
+def indecies(L,x):
+    out = set()
+    for i,j in enumerate(L):
+        if j == x:
+            out.add(i)
+    return out
+
+def condense_list_by_1st_coordinate(L):
+    found = []
+    out = []
+    for x in L:
+        if not x[0] in found:
+            out.append(x)
+            found.append(x[0])
+    return out
+
+def aperiodic_commutative_membership_test(f, A):
+    if len(A) != 0:
+        if f.degree() != A[0].degree():
+            return False, False
+    f, A = Transformation(list(f) + [f.degree()]), [Transformation(list(a) + [a.degree()]) for a in A]
+    powers =[]
+    current_f = f
+    for a in A:
+        defined_states = [s for s in range(current_f.degree()) if hit(s, current_f) != current_f.degree() - 1]
+        if all(hit(s, current_f) in [s, current_f.degree() - 1] for s in range(current_f.degree())):
+            powers += [0] * (len(A) - A.index(a))
+            break
+        gen = a
+
+        threshold = 0
+        temp = gen.identity()
+
+        while not all(hit(s, temp) == hit(s, temp * gen) for s in defined_states):
+            threshold += 1
+            temp *= gen
+
+        j = 0
+        temp = current_f
+        while temp != temp * gen:
+            j += 1
+            temp *= gen
+        if threshold < j:
+            return False, False
+        powers.append(threshold - j)
+        gen_part_of_current_f = gen ** (threshold - j)
+
+        inv = left_psudo_inverse(gen_part_of_current_f)
+
+        fp_res = Transformation([hit(x, inv * current_f) if x in gen_part_of_current_f else current_f.degree() - 1 for x in range(current_f.degree())])
+        current_f = fp_res
+
+    testprod = prod([x[0] ** x[1] for x in zip(A,powers)])
+    return testprod == f, dict(zip([tuple(a) for a in A], powers))
+
+def left_psudo_inverse(T):
+    image =[]
+    for i in range(T.degree()):
+         if i in list(T):
+             image.append(list(T).index(i))
+         else:
+             image.append(i)
+    return Transformation(image)
+
+def prod(L, identity = 0):
+    if len(L) == 0:
+        return identity
+    out = L[0]
+    for l in L[1:]:
+        out *= l
+    return out
+
+def _invert_perm(f):
+    outputs = list(f)
+    return Transformation([outputs.index(i) for i in range(f.degree())])
+
+#Assumes A is commutative
+def is_semilattice(A):
+    band = True
+    for a in A:
+        if a ** 2 != a:
+            band = False
+            break
+    return band
+
+def is_commutative_and_aperiodic(S):
+   A = S.gens
+   for a1 in A:
+       if not all(_transformations_commute(a1, a2) for a2 in A):
+           return False
+   for a in A:
+       pows = [a]
+       while not pows[-1] * a in pows:
+           pows.append(pows[-1] * a)
+       if not pows[-1] * a == pows[-1]:
+           return False
+   return True
+
+def equal_on_states(a,b,states):
+    out = True
+    for s in states:
+        if hit(s, a) != hit(s, b):
+            out = False
+            break
+    return out
+
+def prod(L, identity):
+    out = identity
+    for l in L:
+        out *= l
+    return out
+
+def aperiod_james(f, A):
+    powers = {}
+    restriction = list(range(f.degree()))
+    states = restriction[:]
+    fd = {-1: -1}
+    identity_d = {-1: -1}
+
+    for x in states:
+        fd[x] = hit(x, f)
+        identity_d[x] = x
+
+    for a in A:
+        ad = {-1: -1}
+        for x in states:
+            ad[x] = hit(x, a)
+
+        not_in_fact = False
+        for x in restriction:
+            for y in restriction:
+                if hit(x, a) == hit(y, a) and hit(x, f) != hit(y, f):
+                    not_in_fact = True
+                    break
+        if not_in_fact:
+            powers[tuple(a)] = 0
+            continue
+
+        old_test = identity_d.copy()
+        test = ad.copy()
+        i = 0
+
+        while restrict_dict(old_test, restriction, states) != restrict_dict(test, restriction, states):
+            i += 1
+            old_test = test.copy()
+            test = compose_dicts(test, ad)
+
+        j = 0
+        a_power_by_f = compose_dicts(fd, ad)
+        a_power_by_f_old = fd.copy()
+
+        while a_power_by_f_old != a_power_by_f:
+            j += 1
+            a_power_by_f_old = a_power_by_f.copy()
+            a_power_by_f = compose_dicts(a_power_by_f, ad)
+
+        a_power = pow_dict(ad, i - j, states)
+        powers[tuple(a)] = i - j
+
+        restriction = list(set(a_power.values()).intersection(set(restriction)))
+        fd = restrict_dict(compose_dicts(inverse_dict(a_power, states), fd), restriction, states)
+    test_f = f.identity()
+    for a in A:
+        test_f *= a ** powers[tuple(a)]
+    return test_f == f, powers
+
+def pow_dict(d, power, states):
+    out = {state: state for state in states}
+    out[-1] = -1
+    for i in range(power):
+        out = compose_dicts(out, d)
+    out[-1] = -1
+    return out
+
+def inverse_dict(d, states):
+    out = {}
+
+    for key in states:
+        not_in_image = True
+        for k, v in d.items():
+            if key == v and k != -1:
+                out[key] = k
+                not_in_image = False
+                break
+
+        if not_in_image:
+            out[key] = key
+    out[-1] = -1
+    return out
+
+def restrict_dict(d, new_keys, unrestricted):
+    out = {}
+    for key in set(unrestricted) - set(new_keys):
+        out[key] = -1
+    out[-1] = -1
+    for key in new_keys:
+        out[key] = d[key]
+    return out
+
+def compose_dicts(d1, d2):
+    d = {}
+    for x in d1.keys():
+        d[x] = d2[d1[x]]
+    return d
+
+
+#Given a transformation as a dictionary, its domain, and the size of its domain,
+#it indexes the domain and range of the tranformation, and returns the image
+#list of the transformation acting on these indicies.
+def dict_to_img_list(g_dict, domain, n):
+    return [domain.index(g_dict[domain[i]]) for i in range(n)]
+
+def hit(x, f):
+    for i, image in enumerate(f):
+        if i == x:
+            return image
+
+def stabiliser(SCC, gens, gens_AO_SCCs, states):
+    return set([tuple(a) for a, a_AO_SCCs in zip(gens, gens_AO_SCCs)
+                if a_AO_SCCs[SCC] == SCC]).union(set([tuple(states)]))
+
+#For any tranformation g in the centraliser of S, define a
+#transformation hatg such that (x)hatg = (x)g if the SCC of x is in
+#img_source_SCCs and g stabilises every SCC in img_source_SCCs.
+#Otherwise set (x)hatg = x.
+def hat(f, SCCs, img_source_SCCs, states):
+    #Gives transformation as image list
+    d = {}
+    for SCC in SCCs:
+        if SCC in img_source_SCCs:
+            for x in SCC:
+                d[x] = hit(x, f)
+        else:
+            for x in SCC:
+                d[x] = x
+    return Transformation([d[i] for i in states])
+
 def FullTransformationMonoid(n):
     r'''
     A semigroup :math:`S` is a *moniod* if it has an *identity* element. That
@@ -180,3 +685,215 @@ def FullTransformationMonoid(n):
     return Semigroup([Transformation([1, 0] + list(range(2, n))),
                       Transformation([0, 0] + list(range(2, n))),
                       Transformation([n - 1] + list(range(n - 1)))])
+
+def indicies(L,x):
+   out = set()
+   for i,j in enumerate(L):
+       if j == x:
+           out.add(i)
+   return out
+
+def good_candidates(S, out = [], T = False):
+
+    A = S.gens
+    if isinstance(T,bool):
+        T = FullTransformationMonoid(A[0].degree())
+    states = set(range(A[0].degree()))
+    thresholds = {}
+    images = set.union(*[set(a) for a in A])
+    gens_which_fix_state = dict(zip(list(range(A[0].degree())),[[] for i in range(A[0].degree())]))
+    for s in states:
+        for a in A:
+            if hit(s, a) == s:
+                gens_which_fix_state[s].append(a)
+
+    powers_of_gen = dict(zip([tuple(a) for a in A],[[]]*len(A)))
+    for a in A:
+       old_test = a.identity()
+       test = a
+       i = 0
+       while old_test != test:
+           i += 1
+           old_test = test
+           powers_of_gen[tuple(a)].append(test)
+           test *= a
+       thresholds[tuple(a)] = i
+
+    maxthreshold = max(thresholds.values())
+    edges = {}
+    for i in states:
+       for j in states:
+           edges[(i,j)] = []
+           for a in A:
+               if hit(i, a) == j:
+                   edges[(i,j)].append(a)
+
+    fixed_by_a_gen=[]
+    for a in A:
+       for i in range(A[0].degree()):
+           if hit(i, a) == i:
+               fixed_by_a_gen.append(i)
+    for f in T:
+        check = True
+
+        #checks everything in the image of f is mapped to by a generator
+        if check:
+            check = set(f) <= images
+
+        #checks if f is in S
+        #if check and f in S:
+        #    check = False
+
+
+        #checks if f commutes with generators
+        if check:
+           for a in A:
+               if not _transformations_commute(f, a):
+                   check = False
+                   break
+
+        #checks if f is aperiodic and has threshold less than that of the semigroup
+        if check:
+           i = 1
+           temp = f
+           while temp != temp * f:
+               if i > maxthreshold:
+                   check = False
+                   break
+               i += 1
+               temp *= f
+
+
+        #checks if the preimage of every image of f can by mapped to it's image by an element of the semigroup
+        if check:
+           image = list(f)
+           for i in set(image):
+               reached = set([i])
+               check2 = False
+               while not check2:
+                   check2 = True
+                   for j in states - reached:
+                       temp = set(reached)
+                       for k in temp:
+                           if edges[(j,k)] != []:
+                               reached.add(j)
+                               check2 = False
+               if not reached >= indicies(image,i):
+                   check = False
+                   break
+
+        #checks if everything f fixes is fixed by a generator
+        if check:
+           check = False
+           for i in range(f.degree()):
+               if hit(i, f) == i:
+                   if i in fixed_by_a_gen:
+                       check = True
+                       break
+
+        #checks if f fixes a state fixed by only one generator that f is a power of that generator
+        if check:
+            for s in states:
+                if len(gens_which_fix_state[s]) == 1:
+                    if hit(s, f) == s:
+                        if not f in powers_of_gen[tuple(gens_which_fix_state[s][0])]:
+                            check = False
+                            break
+
+        if check:
+           out.append(f)
+    return out
+
+def possible_other_generators(S, out = [],T = False):
+
+    A = S.gens
+    if isinstance(T,bool):
+        T = FullTransformationMonoid(A[0].degree())
+    states = set(range(A[0].degree()))
+    thresholds = {}
+    images = set.union(*[set(a) for a in A])
+    gens_which_fix_state = dict(zip(list(range(A[0].degree())),[[] for i in range(A[0].degree())]))
+    for s in states:
+        for a in A:
+            if hit(s, a) == s:
+                gens_which_fix_state[s].append(a)
+
+    powers_of_gen = dict(zip([tuple(a) for a in A],[[]]*len(A)))
+    for a in A:
+       old_test = a.identity()
+       test = a
+       i = 0
+       while old_test != test:
+           i += 1
+           old_test = test
+           powers_of_gen[tuple(a)].append(test)
+           test *= a
+       thresholds[tuple(a)] = i
+
+    maxthreshold = max(thresholds.values())
+    edges = {}
+    for i in states:
+       for j in states:
+           edges[(i,j)] = []
+           for a in A:
+               if hit(i, a) == j:
+                   edges[(i,j)].append(a)
+
+    fixed_by_a_gen=[]
+    for a in A:
+       for i in range(A[0].degree()):
+           if hit(i, a) == i:
+               fixed_by_a_gen.append(i)
+    for f in T:
+        check = True
+
+        #checks if f commutes with generators
+        if check:
+           for a in A:
+               if not _transformations_commute(f, a):
+                   check = False
+                   break
+
+        #checks if f is aperiodic and has threshold less than that of the semigroup
+        if check:
+           i = 1
+           temp = f
+           found = []
+           while not temp in found:
+               i += 1
+               found.append(temp)
+               temp *= f
+           check = temp == found[-1]
+
+        if check:
+           out.append(f)
+    return out
+
+def is_commutative_and_aperiodic(S):
+   A = S.gens
+   for a1 in A:
+       if not all(_transformations_commute(a1, a2) for a2 in A):
+           return False
+   for a in A:
+       pows = [a]
+       while not pows[-1] * a in pows:
+           pows.append(pows[-1] * a)
+       if not pows[-1] * a == pows[-1]:
+           return False
+   return True
+
+def TransDirectProduct(*args):
+    assert all(isinstance(semigrp, Semigroup) for semigrp in args)
+    assert all(all(isinstance(elt, Transformation) for elt in semigrp) for semigrp in args)
+    length = sum(i[0].degree() for i in args)
+    identity = list(range(length))
+    out = [Transformation(identity)]
+    usedcount = 0
+    for semigroup in args:
+        deg = semigroup[0].degree()
+        for trans in semigroup.gens:
+            new_img_list = identity[:]
+            new_img_list[usedcount: usedcount + deg] = [usedcount + i for i in list(trans)]
+            out.append(Transformation(new_img_list))
+        usedcount += deg
+    return Semigroup(out)
