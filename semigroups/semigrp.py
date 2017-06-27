@@ -144,6 +144,21 @@ class Semigroup(libsemigroups.SemigroupNC):
                 G._add_edge_with_label(j, (i, adj))
         return G
 
+    def transformation_semigroup_isomorphism(self):
+        X = list(self)
+        def Isomorphism(item):
+            if isinstance(item, Semigroup):
+                gens = []
+                for g in item.gens:
+                    gens.append(Transformation([X.index(x * g) for x in X]))
+                return Semigroup(gens)
+
+            if item in self:
+                return Transformation([X.index(x * item) for x in X])
+            raise ValueError('''input is not in the domain
+                                of this isomorphism''')
+
+        return Isomorphism
 def FullTransformationMonoid(n):
     r'''
     A semigroup :math:`S` is a *moniod* if it has an *identity* element. That
@@ -185,3 +200,40 @@ def FullTransformationMonoid(n):
     return Semigroup([Transformation([1, 0] + list(range(2, n))),
                       Transformation([0, 0] + list(range(2, n))),
                       Transformation([n - 1] + list(range(n - 1)))])
+
+def transformation_direct_product(*args):
+    r'''
+    Given some Transformation Monoids constructs a Transformation
+    Monoid which is isomorphic to their direct product
+
+    Args:
+        args (list): The Transformation Monoids.
+
+    Raises:
+        TypeError: If arguments are not Semigroups.
+        ValueError: If Semigroups are not Transformation Semigroups.
+
+    Examples:
+        >>> from semigroups import FpMonoid
+        >>> S = FpMonoid("a",[["a^50", "1"]])
+        >>> T = S.transformation_semigroup_isomorphism()(S)
+        >>> Prod = transformation_direct_product(T, T)
+        >>> Prod.size()
+        2500
+    '''
+    if not all(isinstance(semigrp, Semigroup) for semigrp in args):
+        raise TypeError('inputs must be semigroups')
+    if not all(isinstance(semi.gens[0], Transformation) for semi in args):
+        raise ValueError('semigroups must be Transformation Semigroups')
+    length = sum(S.gens[0].degree() for S in args)
+    identity = list(range(length))
+    out = [Transformation(identity)]
+    usedcount = 0
+    for semigroup in args:
+        deg = semigroup[0].degree()
+        for trans in semigroup.gens:
+            new_img_list = identity[:]
+            new_img_list[usedcount: usedcount + deg] = [usedcount + i for i in list(trans)]
+            out.append(Transformation(new_img_list))
+        usedcount += deg
+    return Semigroup(out)
