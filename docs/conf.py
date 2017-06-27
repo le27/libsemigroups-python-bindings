@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Semigroups'
-copyright = u'2017, James D. Mitchell, Nicolas M. Thiéry, Luke Elliot, Alex Levine'
+copyright = u'2017, James D. Mitchell, Nicolas M. Thiéry, Luke Elliott, Alex Levine'
 author = u'James D. Mitchell, Nicolas M. Thiéry, Luke Elliot, Alex Levine'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -152,7 +152,7 @@ autoclass_content = 'class'
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
-#
+#i
 html_title = u'semigroups v0.3.1'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
@@ -288,7 +288,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'semigroups.tex', u'semigroups Documentation',
-     u'James D. Mitchell, Nicolas M. Thiéry, Luke Elliot, Alex Levine', 'manual'),
+     u'James D. Mitchell, Nicolas M. Thiéry, Luke Elliott, Alex Levine', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
