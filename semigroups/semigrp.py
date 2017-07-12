@@ -52,7 +52,7 @@ class Semigroup(libsemigroups.SemigroupNC):
             raise ValueError('there must be at least 1 argument')
         elif not all(map(lambda elt: isinstance(elt, type(args[0])), args)):
             raise TypeError('generators must be of the same type')
-
+        self._is_trans_semigroup = isinstance(args[0], Transformation)
         err_msg = 'generators must have a multiplication defined on them'
         x = args[0]
         if not isinstance(x, ElementABC):
@@ -66,6 +66,77 @@ class Semigroup(libsemigroups.SemigroupNC):
                 else PythonElementNC(g) for g in args]
         libsemigroups.SemigroupNC.__init__(self, self.gens)
         self._done_commute_membership = False
+
+    def __contains__(self, x):
+        if self._is_trans_semigroup:
+            if not x.degree() == self.gens[0].degree():
+                return False
+
+            if self._is_perm_group():
+                self.enumerate(300000)
+                if self.is_done():
+                    return libsemigroups.SemigroupNC.__contains__(self, x)
+                if self.gens[0].degree() < 50:
+                    return self._perm_group_mem(x)
+
+        if not isinstance(x, ElementABC):
+            x = PythonElementNC(x)
+        return libsemigroups.SemigroupNC.__contains__(self, x)
+
+        def size(self):
+            """
+            A function to find the number of elements in a semigroup.
+
+            Returns:
+                int: The number of elements of the semigroup.
+
+            Raises:
+                TypeError:  If any arguments are passed.
+
+            Examples:
+
+                >>> from semigroups import Semigroup, Transformation
+                >>> S = Semigroup([Transformation([1, 1, 4, 5, 4, 5]),
+                ...                Transformation([2, 3, 2, 3, 5, 5])])
+                >>> S.size()
+                5
+            """
+            self.enumerate(300000)
+            if self.is_done():
+                return libsemigroups.SemigroupNC.size(self)
+            if self._is_perm_group():
+                if self.gens[0].degree() < 50:
+                    return self._perm_group_size()
+            return libsemigroups.SemigroupNC.size(self)
+
+    #returns a list of elements(as tuples of generators) which map s to
+    #each state in its orbit and it's orbit
+    def _orbit(self, s):
+        X = {s}
+        X_transformations = {s: ()}
+        test = True
+
+        while test:
+            test = False
+
+            for g in self.gens:
+                new_elements = set(["check"])
+
+                while not X >= new_elements:
+                    X = set.union(X, new_elements)
+                    new_elements = set()
+
+                    for x in X:
+                        if x != "check" and not g[x] in X:
+                            new_elements.add(g[x])
+                            test = True
+                            X_transformations[g[x]] = (X_transformations[x] +
+                                                       (g,))
+
+                X.discard("check")
+
+        X = list(X)
+        return X_transformations, X
 
     def right_cayley_graph(self):
         r"""
@@ -144,6 +215,64 @@ class Semigroup(libsemigroups.SemigroupNC):
                 G._add_edge_with_label(j, (i, adj))
         return G
 
+    #Tests membership in a permutation group. Uses the Schreier-Sims algorithm.
+    def _perm_group_mem(self, f):
+        if not len(list(f)) == len(set(f)):
+            return False
+        orbit_list = []
+        fnew = f
+        stab = self
+        n = self.gens[0].degree()
+
+        for i in range(n - 1):
+            gtrans, orbit = stab._orbit(i)
+            trans = [_prod(gtrans[i],
+                           Transformation(list(range(n)))) for i in orbit]
+            orbit_list.append(orbit)
+
+            if not fnew[i] in orbit:
+                return False
+
+            fnew *= trans[orbit.index(fnew[i])].inverse()
+            if fnew == fnew.identity():
+                return True
+
+            new_gens = set()
+            for t in trans:
+                for g in stab.gens:
+                    new_gens.add(tuple(t * g *
+                                       (trans[orbit.index((t *
+                                                           g)[i])]).inverse()))
+
+            new_gens = [Transformation(list(g)) for g in new_gens]
+            stab = Semigroup(_short_perm_group_generating_set(new_gens))
+            if stab.gens == [Transformation(list(range(n)))]:
+                return fnew == Transformation(list(range(n)))
+
+    #Finds the size of a perm group using the Schreier-Sims algorithm.
+    def _perm_group_size(self):
+        orbit_list = []
+        stab = self
+        n = self.gens[0].degree()
+
+        for i in range(n - 1):
+            trans, orbit = stab._orbit(i)
+            trans = [_prod(trans[i],
+                           Transformation(list(range(n)))) for i in orbit]
+            orbit_list.append(orbit)
+            new_gens = set()
+
+            for t in trans:
+                for g in stab.gens:
+                    new_gens.add(tuple(t * g *
+                                       (trans[orbit.index((t *
+                                                           g)[i])]).inverse()))
+
+            new_gens = [Transformation(list(g)) for g in new_gens]
+            stab = Semigroup(_short_perm_group_generating_set(new_gens))
+
+        return _prod([len(orbit) for orbit in orbit_list], 1)
+
     def transformation_semigroup_isomorphism(self):
         X = list(self)
         def Isomorphism(item):
@@ -159,6 +288,13 @@ class Semigroup(libsemigroups.SemigroupNC):
                                 of this isomorphism''')
 
         return Isomorphism
+
+    #Assumes self is a transformation semigroup
+    def _is_perm_group(self):
+        if not isinstance(self.gens[0], Transformation):
+            return False
+        return all(len(list(a)) == len(set(a)) for a in self.gens)
+
 def FullTransformationMonoid(n):
     r'''
     A semigroup :math:`S` is a *moniod* if it has an *identity* element. That
@@ -237,6 +373,36 @@ def transformation_direct_product(*args):
             out.append(Transformation(new_img_list))
         usedcount += deg
     return Semigroup(out)
+
+#Given a generating set for a group, this function attempts to find a smaller
+#generating set for the same group.
+def _short_perm_group_generating_set(big):
+    tableau = {}
+    current_gens = big[:]
+    new_gens = current_gens[:]
+    for j in range(big[0].degree()):
+        current_gens = new_gens[:]
+        new_gens = []
+        for g in current_gens:
+            if (j, g[j]) not in tableau.keys():
+                tableau[(j, g[j])] = g
+                new_gens.append(g)
+            elif g.inverse() * tableau[(j, g[j])] != g.identity():
+                new_gens.append(g.inverse() * tableau[(j, g[j])])
+    output = []
+    for g in new_gens:
+        if not g in output:
+            output.append(g)
+    return output
+
+#Calculates the product of a list.
+def _prod(L, identity=0):
+    if len(L) == 0:
+        return identity
+    out = L[0]
+    for l in L[1:]:
+        out *= l
+    return out
 
 def symmetric_group(n):
     r'''
