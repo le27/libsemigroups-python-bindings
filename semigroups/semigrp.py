@@ -62,7 +62,7 @@ class Semigroup(libsemigroups.SemigroupNC):
                 raise TypeError(err_msg)
 
         self.gens = [g if (isinstance(g, ElementABC) and str(type(g)) !=
-                      "<class 'semigroups.semifp.FPSOME'>")
+                      "<class 'semigroups.semifp._FPSOME'>")
                 else PythonElementNC(g) for g in args]
         libsemigroups.SemigroupNC.__init__(self, self.gens)
         self._done_commute_membership = False
