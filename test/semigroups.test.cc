@@ -2628,3 +2628,16 @@ TEST_CASE("Semigroup 64: batch_size (for an extremely large value)",
 
   REQUIRE(S.size() == 5);
 }
+
+TEST_CASE("Semigroup 65: small perm group",
+          "[quick][semigroup][finite][permgroup]") {
+  std::vector<Element*> gens = {new Permutation<u_int16_t>({1, 0, 2}),
+                                new Permutation<u_int16_t>({1, 2, 0})};
+  Semigroup S = Semigroup(gens);
+  S.set_report(SEMIGROUPS_REPORT);
+  REQUIRE(*static_cast<Permutation<u_int16_t>*>(gens[0])->inverse() == Permutation<u_int16_t>({1, 0, 2}));
+  really_delete_cont(gens);
+
+  REQUIRE(S.size() == 6);
+
+}
